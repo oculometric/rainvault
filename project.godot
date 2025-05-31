@@ -1,0 +1,40 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+[application]
+
+config/name="RAINVAULT"
+run/main_scene="uid://e8khi3jsa8u6"
+config/features=PackedStringArray("4.4", "C#", "Forward Plus")
+boot_splash/bg_color=Color(0.0522, 0.0522, 0.18, 1)
+boot_splash/show_image=false
+boot_splash/fullsize=false
+boot_splash/use_filter=false
+config/icon="res://icon.svg"
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=960
+window/size/sharp_corners=true
+
+[dotnet]
+
+project/assembly_name="RAINVAULT"
+
+[rendering]
+
+rendering_device/fallback_to_d3d12=false
+rendering_device/fallback_to_opengl3=false
+renderer/rendering_method.mobile="forward_plus"
+renderer/rendering_method.web="forward_plus"
+textures/default_filters/anisotropic_filtering_level=0
+textures/decals/filter=0
+textures/light_projectors/filter=0

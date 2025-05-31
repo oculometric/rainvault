@@ -1,0 +1,133 @@
+[gd_scene load_steps=9 format=3 uid="uid://e8khi3jsa8u6"]
+
+[ext_resource type="PackedScene" uid="uid://b81ggsfhxojp2" path="res://sc_StretchPanCamera.tscn" id="1_8k6bv"]
+[ext_resource type="Material" uid="uid://b7aopgps1r4fp" path="res://m_RustyMetal.tres" id="1_x55td"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_x55td"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_8k6bv"]
+material = ExtResource("1_x55td")
+size = Vector3(0.5, 8, 0.5)
+
+[sub_resource type="BoxMesh" id="BoxMesh_p80au"]
+material = ExtResource("1_x55td")
+size = Vector3(0.2, 8, 1.6)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_8k6bv"]
+size = Vector2(6.4, 14.4)
+
+[sub_resource type="SphereMesh" id="SphereMesh_8k6bv"]
+
+[sub_resource type="Environment" id="Environment_8k6bv"]
+background_mode = 1
+background_color = Color(0.386259, 0.317663, 0.270554, 1)
+tonemap_mode = 2
+ssao_light_affect = 1.0
+ssao_ao_channel_affect = 1.0
+glow_enabled = true
+glow_hdr_threshold = 0.9
+fog_enabled = true
+fog_mode = 1
+fog_light_color = Color(0.57, 0.54796, 0.4047, 1)
+fog_density = 1.0
+fog_depth_curve = 1.86607
+fog_depth_begin = 1.0
+fog_depth_end = 32.0
+volumetric_fog_albedo = Color(0.685591, 0.733878, 0.620301, 1)
+volumetric_fog_emission = Color(0.591944, 0.502902, 0.367152, 1)
+volumetric_fog_length = 32.0
+adjustment_enabled = true
+adjustment_contrast = 0.92
+adjustment_saturation = 1.4
+
+[node name="TestScene" type="Node3D"]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -5.32458)
+mesh = SubResource("BoxMesh_x55td")
+
+[node name="MeshInstance3D6" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.2, 0, 0.8)
+mesh = SubResource("BoxMesh_8k6bv")
+
+[node name="MeshInstance3D13" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.2, 0, -2.4)
+mesh = SubResource("BoxMesh_8k6bv")
+
+[node name="MeshInstance3D14" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.2, 0, -5.6)
+mesh = SubResource("BoxMesh_8k6bv")
+
+[node name="MeshInstance3D15" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.2, 0, -8.8)
+mesh = SubResource("BoxMesh_8k6bv")
+
+[node name="MeshInstance3D16" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.2, 0, -12)
+mesh = SubResource("BoxMesh_8k6bv")
+
+[node name="MeshInstance3D5" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.2, 0, 0)
+mesh = SubResource("BoxMesh_p80au")
+
+[node name="MeshInstance3D7" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.2, 0, -1.6)
+mesh = SubResource("BoxMesh_p80au")
+
+[node name="MeshInstance3D8" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.2, 0, -3.2)
+mesh = SubResource("BoxMesh_p80au")
+
+[node name="MeshInstance3D9" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.2, 0, -4.8)
+mesh = SubResource("BoxMesh_p80au")
+
+[node name="MeshInstance3D10" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.2, 0, -6.4)
+mesh = SubResource("BoxMesh_p80au")
+
+[node name="MeshInstance3D11" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.2, 0, -8)
+mesh = SubResource("BoxMesh_p80au")
+
+[node name="MeshInstance3D12" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.2, 0, -9.6)
+mesh = SubResource("BoxMesh_p80au")
+
+[node name="MeshInstance3D17" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.2, 0, -11.2)
+mesh = SubResource("BoxMesh_p80au")
+
+[node name="MeshInstance3D3" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -6.4)
+mesh = SubResource("PlaneMesh_8k6bv")
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7, -5.325)
+mesh = SubResource("SphereMesh_8k6bv")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.901228, -0.0824781, 0.425423, -0.433345, -0.17153, 0.884754, 0, -0.98172, -0.190329, 0, 1.09927, 0)
+
+[node name="SubViewportContainer" type="SubViewportContainer" parent="."]
+texture_filter = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+stretch = true
+stretch_shrink = 3
+
+[node name="SubViewport" type="SubViewport" parent="SubViewportContainer"]
+handle_input_locally = false
+size = Vector2i(426, 320)
+render_target_update_mode = 4
+
+[node name="Camera" parent="SubViewportContainer/SubViewport" instance=ExtResource("1_8k6bv")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7, 0)
+current = true
+fov = 65.0
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_8k6bv")

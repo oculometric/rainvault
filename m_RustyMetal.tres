@@ -1,0 +1,11 @@
+[gd_resource type="ShaderMaterial" load_steps=3 format=3 uid="uid://b7aopgps1r4fp"]
+
+[ext_resource type="Shader" uid="uid://dd758ytto2nhm" path="res://sh_BasicLit.gdshader" id="1_hhsho"]
+[ext_resource type="Texture2D" uid="uid://buatgudcdjy8q" path="res://RustyPaint_t.png" id="2_4ns6k"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_hhsho")
+shader_parameter/albedo_tex = ExtResource("2_4ns6k")
+shader_parameter/use_triplanar = true
+shader_parameter/triplanar_scale = 16.0
