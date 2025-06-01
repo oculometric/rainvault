@@ -20,7 +20,7 @@ size = Vector2(6.4, 14.4)
 
 [sub_resource type="Environment" id="Environment_8k6bv"]
 background_mode = 1
-background_color = Color(0.386259, 0.317663, 0.270554, 1)
+background_color = Color(0.39, 0.35022, 0.3237, 1)
 tonemap_mode = 2
 ssao_light_affect = 1.0
 ssao_ao_channel_affect = 1.0
