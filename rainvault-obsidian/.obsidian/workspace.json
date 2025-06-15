@@ -1,0 +1,182 @@
+{
+  "main": {
+    "id": "6d032ca5a42e2148",
+    "type": "split",
+    "children": [
+      {
+        "id": "65af05e4f9165951",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "738f236291495f2c",
+            "type": "leaf",
+            "state": {
+              "type": "canvas",
+              "state": {
+                "file": "game concept map.canvas",
+                "viewState": {
+                  "x": 458.4592668646407,
+                  "y": 56.10264864442735,
+                  "zoom": -0.26930468403635166
+                }
+              },
+              "icon": "lucide-layout-dashboard",
+              "title": "game concept map"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "de9a4e4d0912a5bd",
+    "type": "split",
+    "children": [
+      {
+        "id": "b9a7908b77478173",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "8ce21efdd5e112d3",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "13d7460d6e3fccf7",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "9a3d5f7bba8ad421",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "2d0cdbdd10cb34c9",
+    "type": "split",
+    "children": [
+      {
+        "id": "729754e9b1fac841",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "4d0875cfba4bf65d",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "game concept map.canvas",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks for game concept map"
+            }
+          },
+          {
+            "id": "3cbdeaa952d3507b",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "game concept map.canvas",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links from game concept map"
+            }
+          },
+          {
+            "id": "0ae5a60ea2bcd53c",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "f363c5e6b17b8616",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "game concept map.canvas",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline of game concept map"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "obsidian-excalidraw-plugin:New drawing": false,
+      "obsidian-kanban:Create new board": false
+    }
+  },
+  "active": "738f236291495f2c",
+  "lastOpenFiles": [
+    "idea map.md",
+    "game concept map.canvas",
+    "Welcome.md"
+  ]
+}
