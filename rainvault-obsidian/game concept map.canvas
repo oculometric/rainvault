@@ -26,7 +26,7 @@
 		{"id":"1c5f1e4e971612bf","type":"text","text":"menus to control the greenhouse/read about constellations or objects?","x":1230,"y":544,"width":340,"height":87},
 		{"id":"30102ff742a0bb84","type":"text","text":"texel art","x":470,"y":447,"width":128,"height":60},
 		{"id":"c5c8abc5dde2aec2","type":"text","text":"### heavy UI","x":990,"y":424,"width":160,"height":60},
-		{"id":"116aa7267f0b1f1f","type":"text","text":"## look & design","x":672,"y":447,"width":250,"height":60},
+		{"id":"116aa7267f0b1f1f","type":"text","text":"## art & world","x":672,"y":447,"width":250,"height":60},
 		{"id":"1d9e7c23c81c8ab1","type":"text","text":"not quite PSX, but pixelated, cheaply rendered look","x":318,"y":526,"width":278,"height":91},
 		{"id":"c17c64cf4f4fc380","type":"text","text":"every frame should look well-composed","x":318,"y":645,"width":278,"height":80},
 		{"id":"3dbf483d74a99fc2","type":"text","text":"volumetric fog should be used, non-realistic rendering but still with realism (good shadows, simple shading, etc)","x":318,"y":751,"width":278,"height":130},
