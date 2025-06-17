@@ -1,0 +1,14 @@
+[gd_resource type="ShaderMaterial" load_steps=3 format=3 uid="uid://beghi1girw72t"]
+
+[ext_resource type="Shader" uid="uid://hjgj01qc05i6" path="res://shaders/sh_TranslucentLit.gdshader" id="1_8xg5s"]
+[ext_resource type="Texture2D" uid="uid://eaxsaynobriv" path="res://textures/T_DirtyGlass_t.png" id="2_6brbv"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_8xg5s")
+shader_parameter/albedo_tex = ExtResource("2_6brbv")
+shader_parameter/use_triplanar = false
+shader_parameter/triplanar_scale = 1.0
+shader_parameter/randomise_uv_offset = true
+shader_parameter/randomise_resolution = 1024.0
+shader_parameter/randomise_lock_y = false

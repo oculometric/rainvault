@@ -1,7 +1,9 @@
-[gd_scene load_steps=9 format=3 uid="uid://e8khi3jsa8u6"]
+[gd_scene load_steps=13 format=3 uid="uid://e8khi3jsa8u6"]
 
 [ext_resource type="PackedScene" uid="uid://b81ggsfhxojp2" path="res://sc_StretchPanCamera.tscn" id="1_8k6bv"]
-[ext_resource type="Material" uid="uid://b7aopgps1r4fp" path="res://m_RustyMetal.tres" id="1_x55td"]
+[ext_resource type="Material" uid="uid://b7aopgps1r4fp" path="res://materials/m_RustyMetal.tres" id="1_x55td"]
+[ext_resource type="PackedScene" uid="uid://d2bsoee6byxif" path="res://rainvault assets.blend" id="3_p80au"]
+[ext_resource type="Shader" uid="uid://btg3qptthjgj0" path="res://shaders/sh_Background.gdshader" id="4_awu5e"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_x55td"]
 
@@ -20,8 +22,10 @@ size = Vector2(6.4, 14.4)
 
 [sub_resource type="Environment" id="Environment_8k6bv"]
 background_mode = 1
-background_color = Color(0.39, 0.35022, 0.3237, 1)
+background_color = Color(0.61355, 0.567, 0.7, 1)
 tonemap_mode = 2
+ssao_enabled = true
+ssao_radius = 2.0
 ssao_light_affect = 1.0
 ssao_ao_channel_affect = 1.0
 glow_enabled = true
@@ -39,6 +43,15 @@ volumetric_fog_length = 32.0
 adjustment_enabled = true
 adjustment_contrast = 0.92
 adjustment_saturation = 1.4
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_p80au"]
+render_priority = -128
+shader = ExtResource("4_awu5e")
+
+[sub_resource type="QuadMesh" id="QuadMesh_awu5e"]
+material = SubResource("ShaderMaterial_p80au")
+flip_faces = true
+size = Vector2(2, 2)
 
 [node name="TestScene" type="Node3D"]
 
@@ -99,7 +112,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.2, 0, -11.2)
 mesh = SubResource("BoxMesh_p80au")
 
 [node name="MeshInstance3D3" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -6.4)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -14.4)
 mesh = SubResource("PlaneMesh_8k6bv")
 
 [node name="MeshInstance3D2" type="MeshInstance3D" parent="."]
@@ -108,6 +121,7 @@ mesh = SubResource("SphereMesh_8k6bv")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.901228, -0.0824781, 0.425423, -0.433345, -0.17153, 0.884754, 0, -0.98172, -0.190329, 0, 1.09927, 0)
+shadow_enabled = true
 
 [node name="SubViewportContainer" type="SubViewportContainer" parent="."]
 texture_filter = 1
@@ -121,7 +135,7 @@ stretch_shrink = 3
 
 [node name="SubViewport" type="SubViewport" parent="SubViewportContainer"]
 handle_input_locally = false
-size = Vector2i(426, 320)
+size = Vector2i(2, 2)
 render_target_update_mode = 4
 
 [node name="Camera" parent="SubViewportContainer/SubViewport" instance=ExtResource("1_8k6bv")]
@@ -131,3 +145,12 @@ fov = 65.0
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_8k6bv")
+
+[node name="rainvault assets" parent="." instance=ExtResource("3_p80au")]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 0, 0, -3.49691e-07)
+
+[node name="Background" type="MeshInstance3D" parent="."]
+cast_shadow = 0
+extra_cull_margin = 16384.0
+gi_mode = 0
+mesh = SubResource("QuadMesh_awu5e")

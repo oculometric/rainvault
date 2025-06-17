@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://b81ggsfhxojp2"]
 
-[ext_resource type="Script" uid="uid://ct6p03ki1y2qi" path="res://StretchPanCamera.cs" id="1_rrq1c"]
+[ext_resource type="Script" uid="uid://ct6p03ki1y2qi" path="res://scripts/StretchPanCamera.cs" id="1_rrq1c"]
 
 [node name="Camera" type="Camera3D"]
 script = ExtResource("1_rrq1c")

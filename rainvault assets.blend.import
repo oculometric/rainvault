@@ -32,7 +32,206 @@ animation/trimming=false
 animation/remove_immutable_tracks=true
 animation/import_rest_as_RESET=false
 import_script/path=""
-_subresources={}
+_subresources={
+"materials": {
+"DirtyBricks": {
+"use_external/enabled": true,
+"use_external/path": "uid://d0qbvbmsi8ai2"
+},
+"DirtyGlass": {
+"use_external/enabled": true,
+"use_external/path": "uid://beghi1girw72t"
+},
+"RustyPaintedMetal": {
+"use_external/enabled": true,
+"use_external/path": "uid://cjdhgk8viv77k"
+}
+},
+"meshes": {
+"rainvault assets_RV_Arch": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 60.0,
+"save_to_file/enabled": true,
+"save_to_file/path": "res://meshes/greenhouse/sm_Arch.res"
+},
+"rainvault assets_RV_ArchCorner": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 60.0,
+"save_to_file/enabled": true,
+"save_to_file/path": "res://meshes/greenhouse/sm_ArchCorner.res"
+},
+"rainvault assets_RV_ArchEnd": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 60.0,
+"save_to_file/enabled": true,
+"save_to_file/path": "res://meshes/greenhouse/sm_ArchEnd.res"
+},
+"rainvault assets_RV_Floor": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 60.0,
+"save_to_file/enabled": true,
+"save_to_file/path": "res://meshes/greenhouse/sm_Floor.res"
+},
+"rainvault assets_RV_FloorEnd": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 60.0,
+"save_to_file/enabled": true,
+"save_to_file/path": "res://meshes/greenhouse/sm_FloorEnd.res"
+},
+"rainvault assets_RV_FloorEndShort": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 60.0,
+"save_to_file/enabled": true,
+"save_to_file/path": "res://meshes/greenhouse/sm_FloorEndShort.res"
+},
+"rainvault assets_RV_Wall": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 60.0,
+"save_to_file/enabled": true,
+"save_to_file/path": "res://meshes/greenhouse/sm_Wall.res"
+},
+"rainvault assets_RV_WallCorner": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 60.0,
+"save_to_file/enabled": true,
+"save_to_file/path": "res://meshes/greenhouse/sm_WallCorner.res"
+},
+"rainvault assets_RV_WallCurved": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 60.0,
+"save_to_file/enabled": true,
+"save_to_file/path": "res://meshes/greenhouse/sm_WallCurved.res"
+},
+"rainvault assets_RV_WallEnd": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 60.0,
+"save_to_file/enabled": true,
+"save_to_file/path": "res://meshes/greenhouse/sm_WallEnd.res"
+},
+"rainvault assets_RV_WallShortCurved": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 60.0,
+"save_to_file/enabled": true,
+"save_to_file/path": "res://meshes/greenhouse/sm_WallShortCurved.res"
+},
+"rainvault assets_RV_WallShortEnd": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 60.0,
+"save_to_file/enabled": true,
+"save_to_file/path": "res://meshes/greenhouse/sm_WallShortEnd.res"
+}
+},
+"nodes": {
+"PATH:Camera": {
+"import/skip_import": true
+},
+"PATH:Camera_001": {
+"import/skip_import": true
+},
+"PATH:Cube": {
+"import/skip_import": true
+},
+"PATH:Cube_001": {
+"import/skip_import": true
+},
+"PATH:DirtyBricks": {
+"import/skip_import": true
+},
+"PATH:DirtyGlass": {
+"import/skip_import": true
+},
+"PATH:Palm_Tree_A_001": {
+"import/skip_import": true
+},
+"PATH:Palm_Tree_A_002": {
+"import/skip_import": true
+},
+"PATH:Palm_Tree_A_003": {
+"import/skip_import": true
+},
+"PATH:Palm_Tree_D_002": {
+"import/skip_import": true
+},
+"PATH:Palm_Tree_D_004": {
+"import/skip_import": true
+},
+"PATH:Plane": {
+"import/skip_import": true
+},
+"PATH:Plane_002": {
+"import/skip_import": true
+},
+"PATH:Plane_003": {
+"import/skip_import": true
+},
+"PATH:Plane_004": {
+"import/skip_import": true
+},
+"PATH:Plane_005": {
+"import/skip_import": true
+},
+"PATH:Plane_006": {
+"import/skip_import": true
+},
+"PATH:Plane_007": {
+"import/skip_import": true
+},
+"PATH:Plane_008": {
+"import/skip_import": true
+},
+"PATH:Plane_009": {
+"import/skip_import": true
+},
+"PATH:RustyMetal": {
+"import/skip_import": true
+},
+"PATH:RustyPaintedMetal": {
+"import/skip_import": true
+},
+"PATH:Sun": {
+"import/skip_import": true
+},
+"PATH:Sun_001": {
+"import/skip_import": true
+},
+"PATH:Vert": {
+"import/skip_import": true
+},
+"PATH:Vert_001": {
+"import/skip_import": true
+},
+"PATH:Vert_002": {
+"import/skip_import": true
+},
+"PATH:Vert_003": {
+"import/skip_import": true
+}
+}
+}
 blender/nodes/visible=0
 blender/nodes/active_collection_only=false
 blender/nodes/punctual_lights=true

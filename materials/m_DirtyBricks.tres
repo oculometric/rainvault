@@ -1,0 +1,14 @@
+[gd_resource type="ShaderMaterial" load_steps=3 format=3 uid="uid://d0qbvbmsi8ai2"]
+
+[ext_resource type="Shader" uid="uid://c5dxs83cr31cq" path="res://shaders/sh_BasicLit.gdshader" id="1_tb0xs"]
+[ext_resource type="Texture2D" uid="uid://dw4eejfxvepsv" path="res://textures/T_DirtyBricks_t.png" id="2_tb0xs"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_tb0xs")
+shader_parameter/albedo_tex = ExtResource("2_tb0xs")
+shader_parameter/use_triplanar = false
+shader_parameter/triplanar_scale = 1.0
+shader_parameter/randomise_uv_offset = true
+shader_parameter/randomise_resolution = 1024.0
+shader_parameter/randomise_lock_y = true

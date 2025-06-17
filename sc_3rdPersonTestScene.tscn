@@ -1,0 +1,237 @@
+[gd_scene load_steps=16 format=3 uid="uid://nrxuwe33h0tx"]
+
+[ext_resource type="PackedScene" uid="uid://b81ggsfhxojp2" path="res://sc_StretchPanCamera.tscn" id="2_d5hdv"]
+[ext_resource type="ArrayMesh" uid="uid://dpwnrnly8hivc" path="res://meshes/greenhouse/sm_Wall.res" id="3_wuxg6"]
+[ext_resource type="Shader" uid="uid://btg3qptthjgj0" path="res://shaders/sh_Background.gdshader" id="4_dijld"]
+[ext_resource type="ArrayMesh" uid="uid://bhjahqyygojn3" path="res://meshes/greenhouse/sm_WallCurved.res" id="4_nlwyy"]
+[ext_resource type="ArrayMesh" uid="uid://dvwfn3hs07ga3" path="res://meshes/greenhouse/sm_Arch.res" id="5_d5hdv"]
+[ext_resource type="ArrayMesh" uid="uid://bxhunrmehyit0" path="res://meshes/greenhouse/sm_WallCorner.res" id="6_yaf4s"]
+[ext_resource type="ArrayMesh" uid="uid://bmwwyitnwqn24" path="res://meshes/greenhouse/sm_FloorEnd.res" id="7_45utc"]
+[ext_resource type="ArrayMesh" uid="uid://bn2gnd53bc8o1" path="res://meshes/greenhouse/sm_Floor.res" id="8_oaxpx"]
+[ext_resource type="ArrayMesh" uid="uid://cy6465cn5l1ve" path="res://meshes/greenhouse/sm_FloorEndShort.res" id="9_oaxpx"]
+[ext_resource type="ArrayMesh" uid="uid://b4n7wpuhh7ayp" path="res://meshes/greenhouse/sm_ArchCorner.res" id="10_6bnyj"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_x55td"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_8k6bv"]
+
+[sub_resource type="Environment" id="Environment_wuxg6"]
+background_mode = 1
+background_color = Color(0.405, 0.35, 0.5, 1)
+tonemap_mode = 2
+ssao_enabled = true
+ssao_radius = 2.0
+ssao_intensity = 3.0
+ssao_power = 1.09806
+ssao_detail = 5.0
+ssao_horizon = 0.09
+ssao_light_affect = 1.0
+ssao_ao_channel_affect = 1.0
+glow_enabled = true
+glow_hdr_threshold = 0.9
+fog_mode = 1
+fog_light_color = Color(0.57, 0.54796, 0.4047, 1)
+fog_density = 1.0
+fog_depth_curve = 1.86607
+fog_depth_begin = 1.0
+fog_depth_end = 32.0
+volumetric_fog_albedo = Color(0.685591, 0.733878, 0.620301, 1)
+volumetric_fog_emission = Color(0.591944, 0.502902, 0.367152, 1)
+volumetric_fog_length = 32.0
+adjustment_enabled = true
+adjustment_contrast = 0.9
+adjustment_saturation = 1.4
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_p80au"]
+render_priority = -128
+shader = ExtResource("4_dijld")
+
+[sub_resource type="QuadMesh" id="QuadMesh_awu5e"]
+material = SubResource("ShaderMaterial_p80au")
+flip_faces = true
+size = Vector2(2, 2)
+
+[node name="TestScene" type="Node3D"]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -5.32458)
+mesh = SubResource("BoxMesh_x55td")
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7, -5.325)
+mesh = SubResource("SphereMesh_8k6bv")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.71013, -0.4655, 0.528228, -0.67619, -0.241879, 0.695889, -0.196169, -0.851354, -0.486531, 0.680677, 2.51488, -0.304526)
+light_color = Color(1, 0.968627, 0.917647, 1)
+light_bake_mode = 1
+shadow_enabled = true
+sky_mode = 1
+
+[node name="DirectionalLight3D2" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.540709, 0.578798, -0.610432, -0.455247, 0.811551, 0.366246, 0.707379, 0.0798643, 0.702309, 0.79408, 2.13847, 1.63682)
+light_color = Color(0.935, 1, 0.87, 1)
+light_energy = 0.3
+light_bake_mode = 1
+sky_mode = 1
+
+[node name="SubViewportContainer" type="SubViewportContainer" parent="."]
+texture_filter = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+stretch = true
+stretch_shrink = 3
+
+[node name="SubViewport" type="SubViewport" parent="SubViewportContainer"]
+handle_input_locally = false
+size = Vector2i(426, 320)
+render_target_update_mode = 4
+
+[node name="Camera" parent="SubViewportContainer/SubViewport" instance=ExtResource("2_d5hdv")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7, 1.6)
+current = true
+fov = 65.0
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_wuxg6")
+
+[node name="Background" type="MeshInstance3D" parent="."]
+cast_shadow = 0
+extra_cull_margin = 16384.0
+gi_mode = 0
+mesh = SubResource("QuadMesh_awu5e")
+
+[node name="SmWall" type="MeshInstance3D" parent="."]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 0, 0, 0)
+mesh = ExtResource("3_wuxg6")
+
+[node name="SmWall2" type="MeshInstance3D" parent="."]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -6.99382e-08, 0, -1.6)
+mesh = ExtResource("3_wuxg6")
+
+[node name="SmWall3" type="MeshInstance3D" parent="."]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 0, 0, -3.2)
+mesh = ExtResource("3_wuxg6")
+
+[node name="SmWall4" type="MeshInstance3D" parent="."]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -6.99382e-08, 0, -4.8)
+mesh = ExtResource("3_wuxg6")
+
+[node name="SmWall6" type="MeshInstance3D" parent="."]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -6.99382e-08, 0, -6.4)
+mesh = ExtResource("3_wuxg6")
+
+[node name="SmWall7" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.31134e-07, 0, -1, 0, 1, 0, 1, 0, 1.31134e-07, -4.19629e-07, 0, -6.4)
+mesh = ExtResource("3_wuxg6")
+
+[node name="SmWall9" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.31134e-07, 0, -1, 0, 1, 0, 1, 0, 1.31134e-07, -1.39876e-07, 0, -4.8)
+mesh = ExtResource("3_wuxg6")
+
+[node name="SmWall10" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.31134e-07, 0, -1, 0, 1, 0, 1, 0, 1.31134e-07, 6.99382e-08, 0, -3.2)
+mesh = ExtResource("3_wuxg6")
+
+[node name="SmWall11" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.31134e-07, 0, -1, 0, 1, 0, 1, 0, 1.31134e-07, 1.39876e-07, 0, -1.6)
+mesh = ExtResource("3_wuxg6")
+
+[node name="SmWall12" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.31134e-07, 0, -1, 0, 1, 0, 1, 0, 1.31134e-07, 3.49691e-07, 0, 0)
+mesh = ExtResource("3_wuxg6")
+
+[node name="SmWallCurved" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.8)
+mesh = ExtResource("4_nlwyy")
+
+[node name="SmWallCurved2" type="MeshInstance3D" parent="."]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0, 0.8)
+mesh = ExtResource("4_nlwyy")
+
+[node name="SmArch" type="MeshInstance3D" parent="."]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 0, 4, -4.8)
+mesh = ExtResource("5_d5hdv")
+
+[node name="SmArch5" type="MeshInstance3D" parent="."]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 0, 4, -6.4)
+mesh = ExtResource("5_d5hdv")
+
+[node name="SmArch2" type="MeshInstance3D" parent="."]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 0, 4, -3.2)
+mesh = ExtResource("5_d5hdv")
+
+[node name="SmArch3" type="MeshInstance3D" parent="."]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 0, 4, -1.6)
+mesh = ExtResource("5_d5hdv")
+
+[node name="SmArch4" type="MeshInstance3D" parent="."]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 0, 4, -2.38419e-07)
+mesh = ExtResource("5_d5hdv")
+
+[node name="SmArch6" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.31134e-07, 0, -1, 0, 1, 0, 1, 0, 1.31134e-07, 1.39876e-07, 4, -1.6)
+mesh = ExtResource("5_d5hdv")
+
+[node name="SmArch7" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.31134e-07, 0, -1, 0, 1, 0, 1, 0, 1.31134e-07, 2.79753e-07, 4, -4.76837e-07)
+mesh = ExtResource("5_d5hdv")
+
+[node name="SmArch8" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.31134e-07, 0, -1, 0, 1, 0, 1, 0, 1.31134e-07, 0, 4, -3.2)
+mesh = ExtResource("5_d5hdv")
+
+[node name="SmArch9" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.31134e-07, 0, -1, 0, 1, 0, 1, 0, 1.31134e-07, -1.39876e-07, 4, -4.8)
+mesh = ExtResource("5_d5hdv")
+
+[node name="SmArch10" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.31134e-07, 0, -1, 0, 1, 0, 1, 0, 1.31134e-07, -2.79753e-07, 4, -6.4)
+mesh = ExtResource("5_d5hdv")
+
+[node name="SmWallCorner" type="MeshInstance3D" parent="."]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0, -7.2)
+mesh = ExtResource("6_yaf4s")
+
+[node name="SmWallCorner2" type="MeshInstance3D" parent="."]
+transform = Transform3D(4.37114e-08, 3.82137e-15, 1, -8.74228e-08, 1, 0, 1, 8.74228e-08, -4.37114e-08, 0, 0, -7.2)
+mesh = ExtResource("6_yaf4s")
+
+[node name="SmFloorEnd" type="MeshInstance3D" parent="."]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0, 0.8)
+mesh = ExtResource("7_45utc")
+
+[node name="SmFloor" type="MeshInstance3D" parent="."]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 0, 0, 0)
+mesh = ExtResource("8_oaxpx")
+
+[node name="SmFloor2" type="MeshInstance3D" parent="."]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 0, 0, -1.6)
+mesh = ExtResource("8_oaxpx")
+
+[node name="SmFloor3" type="MeshInstance3D" parent="."]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 0, 0, -3.2)
+mesh = ExtResource("8_oaxpx")
+
+[node name="SmFloor4" type="MeshInstance3D" parent="."]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 0, 0, -4.8)
+mesh = ExtResource("8_oaxpx")
+
+[node name="SmFloor5" type="MeshInstance3D" parent="."]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 0, 0, -6.4)
+mesh = ExtResource("8_oaxpx")
+
+[node name="SmFloorEndShort" type="MeshInstance3D" parent="."]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0, -7.2)
+mesh = ExtResource("9_oaxpx")
+
+[node name="SmArchCorner" type="MeshInstance3D" parent="."]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 4, -7.2)
+mesh = ExtResource("10_6bnyj")
+
+[node name="SmArchCorner2" type="MeshInstance3D" parent="."]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, 1, 0, 4.37114e-08, 0, 4, -7.2)
+mesh = ExtResource("10_6bnyj")

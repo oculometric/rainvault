@@ -11,13 +11,13 @@ config_version=5
 [application]
 
 config/name="RAINVAULT"
-run/main_scene="uid://e8khi3jsa8u6"
+run/main_scene="uid://nrxuwe33h0tx"
 config/features=PackedStringArray("4.4", "C#", "Forward Plus")
 boot_splash/bg_color=Color(0.0522, 0.0522, 0.18, 1)
 boot_splash/show_image=false
 boot_splash/fullsize=false
 boot_splash/use_filter=false
-config/icon="res://icon.svg"
+config/icon="res://textures/icon.svg"
 
 [display]
 
