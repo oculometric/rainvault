@@ -13,15 +13,15 @@
             "state": {
               "type": "canvas",
               "state": {
-                "file": "game concept map.canvas",
+                "file": "greenhouse inspo.canvas",
                 "viewState": {
-                  "x": 102.2638673910875,
-                  "y": -78.61184102584491,
-                  "zoom": -0.28080338107633346
+                  "x": 207.98044224687646,
+                  "y": 408.60129751291294,
+                  "zoom": 1
                 }
               },
               "icon": "lucide-layout-dashboard",
-              "title": "game concept map"
+              "title": "greenhouse inspo"
             }
           }
         ]
@@ -175,8 +175,8 @@
   },
   "active": "738f236291495f2c",
   "lastOpenFiles": [
-    "idea map.md",
     "game concept map.canvas",
+    "idea map.md",
     "Welcome.md"
   ]
 }
