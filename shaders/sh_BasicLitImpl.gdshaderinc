@@ -37,7 +37,7 @@ void vertex()
 	unsnapped_position = PROJECTION_MATRIX * MODELVIEW_MATRIX * vec4(VERTEX, 1);
 
 	POSITION = snapXY(unsnapped_position);
-	
+
 	if (determinant(mat3(MODEL_MATRIX)) < 0.0f)
 		NORMAL = -NORMAL;
 }

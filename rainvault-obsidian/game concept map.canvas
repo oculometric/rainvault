@@ -36,7 +36,8 @@
 		{"id":"e8c14b4d20778836","type":"text","text":"boxes identifying interactible elements","x":1230,"y":260,"width":340,"height":50},
 		{"id":"f8cfab5314387dfe","type":"text","text":"labels","x":1230,"y":327,"width":200,"height":50},
 		{"id":"899bc7bd49b389cf","type":"text","text":"constellation overlay, orrery overlay","x":1230,"y":395,"width":340,"height":50},
-		{"id":"4f52d1a0f95f48dd","type":"text","text":"coordinate/info panels","x":1230,"y":465,"width":300,"height":50}
+		{"id":"4f52d1a0f95f48dd","type":"text","text":"coordinate/info panels","x":1230,"y":465,"width":300,"height":50},
+		{"id":"a1d90b5055ece6d0","x":160,"y":154,"width":250,"height":186,"type":"text","text":"discover greenhouses flying over the desert, when you find one, transition into constellation puzzle mode..."}
 	],
 	"edges":[
 		{"id":"3f464b7d273851be","fromNode":"5b4b4d914f16e04f","fromSide":"bottom","toNode":"96f10585cfe87742","toSide":"top"},
@@ -74,6 +75,7 @@
 		{"id":"9758210f0bd2718b","fromNode":"116aa7267f0b1f1f","fromSide":"left","toNode":"1d9e7c23c81c8ab1","toSide":"right"},
 		{"id":"8e0743dba909e617","fromNode":"116aa7267f0b1f1f","fromSide":"left","toNode":"7567ee3e9ca9ba79","toSide":"right"},
 		{"id":"849dddd77e8049db","fromNode":"116aa7267f0b1f1f","fromSide":"left","toNode":"c17c64cf4f4fc380","toSide":"right"},
-		{"id":"06eb7a5f98170169","fromNode":"116aa7267f0b1f1f","fromSide":"left","toNode":"3dbf483d74a99fc2","toSide":"right"}
+		{"id":"06eb7a5f98170169","fromNode":"116aa7267f0b1f1f","fromSide":"left","toNode":"3dbf483d74a99fc2","toSide":"right"},
+		{"id":"93359afa3d4848fc","fromNode":"5b4b4d914f16e04f","fromSide":"bottom","toNode":"a1d90b5055ece6d0","toSide":"top"}
 	]
 }
