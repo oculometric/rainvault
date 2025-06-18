@@ -1,9 +1,13 @@
-[gd_scene load_steps=17 format=3 uid="uid://nrxuwe33h0tx"]
+[gd_scene load_steps=22 format=3 uid="uid://nrxuwe33h0tx"]
 
 [ext_resource type="PackedScene" uid="uid://b81ggsfhxojp2" path="res://sc_StretchPanCamera.tscn" id="2_d5hdv"]
 [ext_resource type="Script" uid="uid://bd611p2fkbio" path="res://scripts/PanZoomCamera.cs" id="2_s3s0n"]
+[ext_resource type="Script" uid="uid://cdyn05qcusgq3" path="res://scripts/TrackedCamera.cs" id="3_gp2kx"]
+[ext_resource type="Shader" uid="uid://b1kb3aynk1onu" path="res://shaders/sh_FinalComposite.gdshader" id="3_sre8k"]
 [ext_resource type="ArrayMesh" uid="uid://dpwnrnly8hivc" path="res://meshes/greenhouse/sm_Wall.res" id="3_wuxg6"]
+[ext_resource type="Texture2D" uid="uid://c5wj34k0n41bs" path="res://textures/icon.svg" id="4_7aipu"]
 [ext_resource type="Shader" uid="uid://btg3qptthjgj0" path="res://shaders/sh_Background.gdshader" id="4_dijld"]
+[ext_resource type="Script" uid="uid://v6kdxpf4xwb5" path="res://scripts/ViewportTextureGrab.cs" id="4_mi42a"]
 [ext_resource type="ArrayMesh" uid="uid://bhjahqyygojn3" path="res://meshes/greenhouse/sm_WallCurved.res" id="4_nlwyy"]
 [ext_resource type="ArrayMesh" uid="uid://dvwfn3hs07ga3" path="res://meshes/greenhouse/sm_Arch.res" id="5_d5hdv"]
 [ext_resource type="ArrayMesh" uid="uid://bxhunrmehyit0" path="res://meshes/greenhouse/sm_WallCorner.res" id="6_yaf4s"]
@@ -15,6 +19,10 @@
 [sub_resource type="BoxMesh" id="BoxMesh_x55td"]
 
 [sub_resource type="SphereMesh" id="SphereMesh_8k6bv"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_7aipu"]
+shader = ExtResource("3_sre8k")
+shader_parameter/ui_texture = ExtResource("4_7aipu")
 
 [sub_resource type="Environment" id="Environment_wuxg6"]
 background_mode = 1
@@ -95,13 +103,58 @@ render_target_update_mode = 4
 [node name="Node3D" type="Node3D" parent="SubViewportContainer/SubViewport"]
 transform = Transform3D(0.707107, -0.40558, 0.579228, 0, 0.819152, 0.573576, -0.707107, -0.40558, 0.579228, 0, 0, -2.4)
 
+[node name="RemoteTransform3D" type="RemoteTransform3D" parent="SubViewportContainer/SubViewport/Node3D"]
+transform = Transform3D(0.707106, 0, -0.707106, -0.40558, 0.819152, -0.40558, 0.579228, 0.573577, 0.579228, 0, 0, 0)
+remote_path = NodePath("../Camera/ColorRect/OverlayViewportContainer/OverlayViewport/CameraOrigin")
+
 [node name="Camera" parent="SubViewportContainer/SubViewport/Node3D" instance=ExtResource("2_d5hdv")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 24)
+cull_mask = 1048573
 current = true
 fov = 42.0
 near = 1.0
 far = 200.0
 script = ExtResource("2_s3s0n")
+
+[node name="ColorRect" type="ColorRect" parent="SubViewportContainer/SubViewport/Node3D/Camera" node_paths=PackedStringArray("target_viewport")]
+material = SubResource("ShaderMaterial_7aipu")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("4_mi42a")
+target_viewport = NodePath("OverlayViewportContainer/OverlayViewport")
+
+[node name="OverlayViewportContainer" type="SubViewportContainer" parent="SubViewportContainer/SubViewport/Node3D/Camera/ColorRect"]
+texture_filter = 1
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+stretch = true
+
+[node name="OverlayViewport" type="SubViewport" parent="SubViewportContainer/SubViewport/Node3D/Camera/ColorRect/OverlayViewportContainer"]
+transparent_bg = true
+handle_input_locally = false
+size = Vector2i(426, 320)
+render_target_update_mode = 4
+
+[node name="Camera3D" type="Camera3D" parent="SubViewportContainer/SubViewport/Node3D/Camera/ColorRect/OverlayViewportContainer/OverlayViewport" node_paths=PackedStringArray("target")]
+cull_mask = 2
+fov = 42.0
+script = ExtResource("3_gp2kx")
+target = NodePath("../../../..")
+
+[node name="Sprite3D" type="Sprite3D" parent="SubViewportContainer/SubViewport/Node3D/Camera/ColorRect/OverlayViewportContainer/OverlayViewport"]
+transform = Transform3D(7.44, 0, 1.87463e-15, 0, -3.25213e-07, 7.44, 0, -7.44, -3.25213e-07, -2.38419e-07, 0, -2.4)
+layers = 2
+texture = ExtResource("4_7aipu")
+
+[node name="CameraOrigin" type="Node3D" parent="SubViewportContainer/SubViewport/Node3D/Camera/ColorRect/OverlayViewportContainer/OverlayViewport"]
+transform = Transform3D(1, -2.98023e-08, 1.19209e-07, 0, 1, 0, 1.19209e-07, -2.98023e-08, 1, 0, 0, -2.4)
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_wuxg6")
