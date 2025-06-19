@@ -1,4 +1,4 @@
-[gd_scene load_steps=22 format=3 uid="uid://nrxuwe33h0tx"]
+[gd_scene load_steps=23 format=3 uid="uid://nrxuwe33h0tx"]
 
 [ext_resource type="PackedScene" uid="uid://b81ggsfhxojp2" path="res://sc_StretchPanCamera.tscn" id="2_d5hdv"]
 [ext_resource type="Script" uid="uid://bd611p2fkbio" path="res://scripts/PanZoomCamera.cs" id="2_s3s0n"]
@@ -15,6 +15,7 @@
 [ext_resource type="ArrayMesh" uid="uid://bn2gnd53bc8o1" path="res://meshes/greenhouse/sm_Floor.res" id="8_oaxpx"]
 [ext_resource type="ArrayMesh" uid="uid://cy6465cn5l1ve" path="res://meshes/greenhouse/sm_FloorEndShort.res" id="9_oaxpx"]
 [ext_resource type="ArrayMesh" uid="uid://b4n7wpuhh7ayp" path="res://meshes/greenhouse/sm_ArchCorner.res" id="10_6bnyj"]
+[ext_resource type="ArrayMesh" uid="uid://bg8wixs40nand" path="res://meshes/greenhouse/sm_ArchCurved.res" id="16_xkcca"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_x55td"]
 
@@ -52,7 +53,7 @@ adjustment_contrast = 0.9
 adjustment_saturation = 1.4
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_p80au"]
-render_priority = -128
+render_priority = -2
 shader = ExtResource("4_dijld")
 
 [sub_resource type="QuadMesh" id="QuadMesh_awu5e"]
@@ -101,7 +102,7 @@ size = Vector2i(426, 320)
 render_target_update_mode = 4
 
 [node name="Node3D" type="Node3D" parent="SubViewportContainer/SubViewport"]
-transform = Transform3D(0.707107, -0.40558, 0.579228, 0, 0.819152, 0.573576, -0.707107, -0.40558, 0.579228, 0, 0, -2.4)
+transform = Transform3D(0.707107, -0.40558, 0.579228, 0, 0.819152, 0.573576, -0.707107, -0.40558, 0.579228, 0, 3, -2.4)
 
 [node name="RemoteTransform3D" type="RemoteTransform3D" parent="SubViewportContainer/SubViewport/Node3D"]
 transform = Transform3D(0.707106, 0, -0.707106, -0.40558, 0.819152, -0.40558, 0.579228, 0.573577, 0.579228, 0, 0, 0)
@@ -149,12 +150,12 @@ script = ExtResource("3_gp2kx")
 target = NodePath("../../../..")
 
 [node name="Sprite3D" type="Sprite3D" parent="SubViewportContainer/SubViewport/Node3D/Camera/ColorRect/OverlayViewportContainer/OverlayViewport"]
-transform = Transform3D(7.44, 0, 1.87463e-15, 0, -3.25213e-07, 7.44, 0, -7.44, -3.25213e-07, -2.38419e-07, 0, -2.4)
+transform = Transform3D(0.744, 0, 1.87463e-16, 0, -3.25213e-08, 0.744, 0, -0.744, -3.25213e-08, -2.38419e-07, 0, 3.6)
 layers = 2
 texture = ExtResource("4_7aipu")
 
 [node name="CameraOrigin" type="Node3D" parent="SubViewportContainer/SubViewport/Node3D/Camera/ColorRect/OverlayViewportContainer/OverlayViewport"]
-transform = Transform3D(1, -2.98023e-08, 1.19209e-07, 0, 1, 0, 1.19209e-07, -2.98023e-08, 1, 0, 0, -2.4)
+transform = Transform3D(1, 1.78814e-07, 5.96046e-07, -4.17233e-07, 1, -4.17233e-07, 5.96046e-07, 1.78814e-07, 1, 0, 3, -2.4)
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_wuxg6")
@@ -296,3 +297,11 @@ mesh = ExtResource("10_6bnyj")
 [node name="SmArchCorner2" type="MeshInstance3D" parent="."]
 transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, 1, 0, 4.37114e-08, 0, 4, -7.2)
 mesh = ExtResource("10_6bnyj")
+
+[node name="SmArchCurved" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4, 0.8)
+mesh = ExtResource("16_xkcca")
+
+[node name="SmArchCurved2" type="MeshInstance3D" parent="."]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4, 0.8)
+mesh = ExtResource("16_xkcca")

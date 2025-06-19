@@ -26,12 +26,10 @@ vec3 star_func(vec3 co, float r)
 void fragment()
 {
 	float depth = texture(depth_texture, SCREEN_UV).x;
-	if (depth > 0.0f)
-		discard;
-	
 	vec3 ndc = vec3(SCREEN_UV * 2.0f - 1.0f, depth);
 	vec4 world = INV_VIEW_MATRIX * ((INV_PROJECTION_MATRIX * vec4(ndc, 1.0f)) * vec4(1.0f, 1.0f, 1.0f, 0.0f));
 	vec3 dir = normalize(world.xyz);
-	
+
 	ALBEDO = star_func(dir * 10.0f, 1.0f) + star_func(dir * 25.0f, 0.6f) + star_func(dir * 55.0f, 0.6f);
+	DEPTH = 0.0f;
 }
