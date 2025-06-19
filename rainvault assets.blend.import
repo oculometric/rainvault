@@ -34,6 +34,10 @@ animation/import_rest_as_RESET=false
 import_script/path=""
 _subresources={
 "materials": {
+"ConcretePanels": {
+"use_external/enabled": true,
+"use_external/path": "uid://db6x3dp6h7svv"
+},
 "DirtyBricks": {
 "use_external/enabled": true,
 "use_external/path": "uid://d0qbvbmsi8ai2"
@@ -41,6 +45,14 @@ _subresources={
 "DirtyGlass": {
 "use_external/enabled": true,
 "use_external/path": "uid://beghi1girw72t"
+},
+"MetalVent": {
+"use_external/enabled": true,
+"use_external/path": "uid://cjmyesmlfhpbs"
+},
+"MossyStone": {
+"use_external/enabled": true,
+"use_external/path": "uid://cm2bitcoc0tw2"
 },
 "RustyPaintedMetal": {
 "use_external/enabled": true,
@@ -80,29 +92,53 @@ _subresources={
 "save_to_file/enabled": true,
 "save_to_file/path": "res://meshes/greenhouse/sm_ArchEnd.res"
 },
-"rainvault assets_RV_Floor": {
+"rainvault assets_RV_FloorCorner": {
 "generate/lightmap_uv": 0,
 "generate/lods": 0,
 "generate/shadow_meshes": 0,
 "lods/normal_merge_angle": 60.0,
 "save_to_file/enabled": true,
-"save_to_file/path": "res://meshes/greenhouse/sm_Floor.res"
+"save_to_file/path": "res://meshes/greenhouse/sm_FloorCorner.res"
 },
-"rainvault assets_RV_FloorEnd": {
+"rainvault assets_RV_FloorCornerShort": {
 "generate/lightmap_uv": 0,
 "generate/lods": 0,
 "generate/shadow_meshes": 0,
 "lods/normal_merge_angle": 60.0,
 "save_to_file/enabled": true,
-"save_to_file/path": "res://meshes/greenhouse/sm_FloorEnd.res"
+"save_to_file/path": "res://meshes/greenhouse/sm_FloorCornerShort.res"
 },
-"rainvault assets_RV_FloorEndShort": {
+"rainvault assets_RV_FloorEdge": {
 "generate/lightmap_uv": 0,
 "generate/lods": 0,
 "generate/shadow_meshes": 0,
 "lods/normal_merge_angle": 60.0,
 "save_to_file/enabled": true,
-"save_to_file/path": "res://meshes/greenhouse/sm_FloorEndShort.res"
+"save_to_file/path": "res://meshes/greenhouse/sm_FloorEdge.res"
+},
+"rainvault assets_RV_FloorEdgeShort": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 60.0,
+"save_to_file/enabled": true,
+"save_to_file/path": "res://meshes/greenhouse/sm_FloorEdgeShort.res"
+},
+"rainvault assets_RV_FloorMiddle": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 60.0,
+"save_to_file/enabled": true,
+"save_to_file/path": "res://meshes/greenhouse/sm_FloorMiddle.res"
+},
+"rainvault assets_RV_Roof": {
+"generate/lightmap_uv": 0,
+"generate/lods": 0,
+"generate/shadow_meshes": 0,
+"lods/normal_merge_angle": 60.0,
+"save_to_file/enabled": true,
+"save_to_file/path": "res://meshes/greenhouse/sm_Roof.res"
 },
 "rainvault assets_RV_Wall": {
 "generate/lightmap_uv": 0,

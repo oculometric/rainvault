@@ -1,0 +1,14 @@
+[gd_resource type="ShaderMaterial" load_steps=3 format=3 uid="uid://cjmyesmlfhpbs"]
+
+[ext_resource type="Shader" uid="uid://c5dxs83cr31cq" path="res://shaders/sh_BasicLit.gdshader" id="1_ddxya"]
+[ext_resource type="Texture2D" uid="uid://d07c8jfskx6tg" path="res://textures/T_MetalVent_t.png" id="2_ddxya"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_ddxya")
+shader_parameter/albedo_tex = ExtResource("2_ddxya")
+shader_parameter/use_triplanar = false
+shader_parameter/triplanar_scale = 1.0
+shader_parameter/randomise_uv_offset = true
+shader_parameter/randomise_resolution = 4.0
+shader_parameter/randomise_lock_y = false

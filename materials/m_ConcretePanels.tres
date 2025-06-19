@@ -1,0 +1,14 @@
+[gd_resource type="ShaderMaterial" load_steps=3 format=3 uid="uid://db6x3dp6h7svv"]
+
+[ext_resource type="Shader" uid="uid://c5dxs83cr31cq" path="res://shaders/sh_BasicLit.gdshader" id="1_urms2"]
+[ext_resource type="Texture2D" uid="uid://dorqygy048qe8" path="res://textures/T_ConcretePanels_t.png" id="2_urms2"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_urms2")
+shader_parameter/albedo_tex = ExtResource("2_urms2")
+shader_parameter/use_triplanar = false
+shader_parameter/triplanar_scale = 1.0
+shader_parameter/randomise_uv_offset = true
+shader_parameter/randomise_resolution = 4.0
+shader_parameter/randomise_lock_y = false

@@ -13,17 +13,16 @@ uniform bool randomise_uv_offset = false;
 uniform float randomise_resolution = 1024.0f;
 uniform bool randomise_lock_y = false;
 
-const vec2 snapping_resolution = vec2(640.0f, 480.0f);
 const float snapping_scale = 0.5f;
 
 varying vec3 world_position;
 varying vec3 world_normal;
 varying vec4 unsnapped_position;
 
-vec4 snapXY(vec4 projected_position)
+vec4 snapXY(vec4 projected_position, vec2 resolution)
 {
 	vec3 snapped_position = projected_position.xyz / projected_position.w;
-	snapped_position.xy = round(snapped_position.xy * snapping_resolution * snapping_scale) / (snapping_resolution * snapping_scale);
+	snapped_position.xy = round(snapped_position.xy * resolution * snapping_scale) / (resolution * snapping_scale);
 	snapped_position *= projected_position.w;
 
 	return vec4(snapped_position, projected_position.w);
@@ -36,7 +35,7 @@ void vertex()
 
 	unsnapped_position = PROJECTION_MATRIX * MODELVIEW_MATRIX * vec4(VERTEX, 1);
 
-	POSITION = snapXY(unsnapped_position);
+	POSITION = snapXY(unsnapped_position, VIEWPORT_SIZE);
 
 	if (determinant(mat3(MODEL_MATRIX)) < 0.0f)
 		NORMAL = -NORMAL;
@@ -60,12 +59,12 @@ void fragment()
 	ALBEDO = col.rgb;
 #ifdef GLASS
 	ALBEDO = vec3(1.0f);
-	ALPHA = clamp(col.r * 2.0f, 0.0f, 1.0f);
+	ALPHA = clamp(col.r * 1.0f, 0.0f, 1.0f);
 #else
 	ALPHA = col.a;
 	ALPHA_SCISSOR_THRESHOLD = 0.5f;
 #endif
 
 	ROUGHNESS = 1.0f;
-	SPECULAR = 0.2f;
+	SPECULAR = 0.0f;
 }

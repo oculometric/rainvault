@@ -30,6 +30,6 @@ void fragment()
 	vec4 world = INV_VIEW_MATRIX * ((INV_PROJECTION_MATRIX * vec4(ndc, 1.0f)) * vec4(1.0f, 1.0f, 1.0f, 0.0f));
 	vec3 dir = normalize(world.xyz);
 
-	ALBEDO = star_func(dir * 10.0f, 1.0f) + star_func(dir * 25.0f, 0.6f) + star_func(dir * 55.0f, 0.6f);
+	ALBEDO = clamp(star_func(dir * 10.0f, 1.0f) + star_func(dir * 25.0f, 0.6f) + star_func(dir * 55.0f, 0.6f), 0.0f, 1.0f);
 	DEPTH = 0.0f;
 }
