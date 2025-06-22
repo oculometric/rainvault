@@ -57,12 +57,12 @@ adjustment_enabled = true
 adjustment_contrast = 0.9
 adjustment_saturation = 1.4
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_p80au"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_5igbb"]
 render_priority = -2
 shader = ExtResource("4_dijld")
 
 [sub_resource type="QuadMesh" id="QuadMesh_awu5e"]
-material = SubResource("ShaderMaterial_p80au")
+material = SubResource("ShaderMaterial_5igbb")
 flip_faces = true
 size = Vector2(2, 2)
 
