@@ -1,7 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Diagnostics;
 
 /*
  * 
@@ -21,7 +21,7 @@ using System.Linq;
  */
 
 [Tool]
-public partial class AsteroidGenerator : MeshInstance3D
+public partial class AsteroidGenerator : Node3D
 {
     public override void _Ready()
     {
@@ -30,20 +30,68 @@ public partial class AsteroidGenerator : MeshInstance3D
 
     [ExportToolButton("Regenerate Mesh")]
     public Callable GenerateMeshButton => Callable.From(RegenerateMesh);
+    [Export(PropertyHint.Range, "0.0001,10,0.01,or_greater")]
+    public float resolution { get => _resolution; set { _resolution = value; RegenerateMesh(); } }
+    private float _resolution = 0.0625f;
+    [Export]
+    public float threshold { get => _threshold; set { _threshold = value; RegenerateMesh(); } }
+    private float _threshold = 0.0f;
+    [Export]
+    public Vector3 offset { get => _offset; set { _offset = value; RegenerateMesh(); } }
+    private Vector3 _offset = Vector3.Zero;
+
+    [Export]
+    public MeshInstance3D target;
 
     void RegenerateMesh()
     {
-        Mesh = GenerateMesh((position) => 1.0f - (((position.X * position.X) + (position.Y * position.Y) + (position.Z * position.Z)) * (1.0f / 550.0f)),
-            0.5f, 0.25f, Vector3.Zero, Vector3.One * 40.0f);
+        if (target != null)
+            target.Mesh = GenerateMesh((position) => 1.0f - ((position.X * position.X) + (position.Y * position.Y) + (position.Z * position.Z)),
+                threshold, resolution, offset, Vector3.One * 3.0f);
+    }
+
+    struct VoxelMap
+    {
+        private Vector3I size;
+        private int yStep;
+        private int zStep;
+        private float[] value_map;
+        private bool[] threshold_map;
+
+        public VoxelMap(Vector3I voxel_count)
+        {
+            size = voxel_count; yStep = voxel_count.X; zStep = voxel_count.X * voxel_count.Y;
+            value_map = new float[voxel_count.X * voxel_count.Y * voxel_count.Z];
+            threshold_map = new bool[value_map.Length];
+        }
+
+        public void Write(int index, float value, bool threshold)
+        {
+            value_map[index] = value;
+            threshold_map[index] = threshold;
+        }
+
+        public bool ReadThreshold(int x, int y, int z)
+        {
+            return threshold_map[x + (y * yStep) + (z * zStep)];
+        }
+
+        public Vector3I GetSize()
+        {
+            return size;
+        }
     }
 
     public static ArrayMesh GenerateMesh(Func<Vector3, float> field_function, float threshold, float voxel_scale, Vector3 space_offset, Vector3 space_size)
     {
+        GD.Print("beginning MT mesh generation!!");
+
+        Stopwatch eval_timer = Stopwatch.StartNew();
+
         // pre-evaluate all grid values (prevents recompuation)
-        Vector3 voxel_range = (space_size / voxel_scale).Ceil() / 2.0f;
-        Vector3I voxel_count = (Vector3I)(voxel_range * 2.0f);
-        float[] value_map = new float[(voxel_count.X + 1) * (voxel_count.Y + 1) * (voxel_count.Z + 1)];
-        bool[] threshold_map = new bool[value_map.Length];
+        Vector3I voxel_count = (Vector3I)(space_size / voxel_scale).Ceil();
+        Vector3 voxel_range = (Vector3)voxel_count * voxel_scale / 2.0f;
+        VoxelMap voxel_map = new VoxelMap(voxel_count + Vector3I.One);
 
         int index = 0;
         Vector3 voxel = Vector3.Zero;
@@ -56,8 +104,8 @@ public partial class AsteroidGenerator : MeshInstance3D
                 voxel.X = (space_offset.X - voxel_range.X) - (voxel_scale / 2.0f);
                 for (int x = 0; x <= voxel_count.X; x++)
                 {
-                    value_map[index] = field_function(voxel);
-                    threshold_map[index] = value_map[index] > threshold;
+                    float val = field_function(voxel);
+                    voxel_map.Write(index, val, val > threshold);
 
                     voxel.X += voxel_scale;
                     index++;
@@ -69,21 +117,35 @@ public partial class AsteroidGenerator : MeshInstance3D
             voxel.Z += voxel_scale;
         }
 
+        eval_timer.Stop();
+        GD.Print("evaluated voxel map with size " + voxel_map.GetSize());
+
+        Stopwatch gen_timer = Stopwatch.StartNew();
+
         List<Vector3> vertices = new List<Vector3>();
         // march through the function
         voxel = Vector3.Zero;
-        voxel.Z = space_offset.Z - voxel_range.Z;
+        voxel.Z = -voxel_range.Z;
         for (int z = 0; z < voxel_count.Z; z++)
         {
-            voxel.Y = space_offset.Y - voxel_range.Y;
+            voxel.Y = -voxel_range.Y;
             for (int y = 0; y < voxel_count.Y; y++)
             {
-                voxel.X = space_offset.X - voxel_range.X;
+                voxel.X = -voxel_range.X;
                 for (int x = 0; x < voxel_count.X; x++)
                 {
+                    // extract the corner values from the generated array
                     byte corner_values = 0;
-                    // TODO: extract the corner values from the generated array...
-                    GenerateCubeGeometry(ref vertices, new Vector3(x, y, z), voxel_scale);
+                    if (voxel_map.ReadThreshold(x + 1, y + 1, z + 1))   corner_values |= 0b00000001;
+                    if (voxel_map.ReadThreshold(x, y + 1, z + 1))       corner_values |= 0b00000010;
+                    if (voxel_map.ReadThreshold(x + 1, y, z + 1))       corner_values |= 0b00000100;
+                    if (voxel_map.ReadThreshold(x, y, z + 1))           corner_values |= 0b00001000;
+                    if (voxel_map.ReadThreshold(x + 1, y + 1, z))       corner_values |= 0b00010000;
+                    if (voxel_map.ReadThreshold(x, y + 1, z))           corner_values |= 0b00100000;
+                    if (voxel_map.ReadThreshold(x + 1, y, z))           corner_values |= 0b01000000;
+                    if (voxel_map.ReadThreshold(x, y, z))               corner_values |= 0b10000000;
+
+                    GenerateCubeGeometry(ref vertices, voxel, voxel_scale, corner_values);
                     voxel.X += voxel_scale;
                 }
                 voxel.Y += voxel_scale;
@@ -91,7 +153,10 @@ public partial class AsteroidGenerator : MeshInstance3D
             voxel.Z += voxel_scale;
         }
 
+        gen_timer.Stop();
         GD.Print("have a raw mesh with " + vertices.Count + " verts.");
+
+        Stopwatch clean_timer = Stopwatch.StartNew();
 
         // convert a raw vertex array to a pair of (deduplicated) vertex and index arrays
         Dictionary<Vector3, int> vertex_refs = new Dictionary<Vector3, int>();
@@ -112,8 +177,11 @@ public partial class AsteroidGenerator : MeshInstance3D
             indices.Add(i);
         }
 
+        clean_timer.Stop();
         GD.Print("converted raw to clean mesh with " + used_vertices.Count + " verts and " + indices.Count + " indices.");
-
+        
+        GD.Print("generated voxel map of size " + voxel_count + "(" + (voxel_count.X * voxel_count.Y * voxel_count.Z) + ") in " + (eval_timer.Elapsed + gen_timer.Elapsed + clean_timer.Elapsed).TotalSeconds + " seconds");
+        GD.Print("eval: " + eval_timer.Elapsed.TotalSeconds + "; gen: " + eval_timer.Elapsed.TotalSeconds + "; clean: " + clean_timer.Elapsed.TotalSeconds);
         // TODO: merge by distance
 
         // generate arraymesh
@@ -141,16 +209,16 @@ public partial class AsteroidGenerator : MeshInstance3D
         new(-1, -1, -1)  // 7
     };
 
-    static Tuple<Vector3, bool> GetCorner(Vector3 center, byte values, int index)
+    static Tuple<Vector3, bool> GetCorner(Vector3 center, float voxel_scale, byte values, int index)
     {
-        return new Tuple<Vector3, bool>(center + cube_corners[index], (values & (0b1 << index)) > 0);
+        return new Tuple<Vector3, bool>(center + (cube_corners[index] * voxel_scale * 0.5f), (values & (0b1 << index)) > 0);
     }
 
-    static Tuple<Vector3, bool>[] ExtractCorners(Vector3 center, byte values, int[] indices)
+    static Tuple<Vector3, bool>[] ExtractCorners(Vector3 center, float voxel_scale, byte values, int[] indices)
     {
         Tuple<Vector3, bool>[] arr = new Tuple<Vector3, bool>[indices.Length];
         for (int i = 0; i < indices.Length; i++)
-            arr[i] = GetCorner(center, values, indices[i]);
+            arr[i] = GetCorner(center, voxel_scale, values, indices[i]);
 
         return arr;
     }
@@ -158,7 +226,7 @@ public partial class AsteroidGenerator : MeshInstance3D
     static void GenerateCubeGeometry(ref List<Vector3> vertices, Vector3 cube_center, float cube_size, byte corner_values)
     {
         // evaluate the corners of the cube
-        byte corner_values = EvaluateScalarField(cube_center, field_function, threshold);
+        //byte corner_values = EvaluateScalarField(cube_center, field_function, threshold);
         // if the entire cube is inside or outside the field, there is no geometry to generate
         if (corner_values == 0b00000000 || corner_values == 0b11111111)
             return;
@@ -166,17 +234,17 @@ public partial class AsteroidGenerator : MeshInstance3D
         // generate geometry for each of the 6 tetrahedra inside the cube
 
         // tetra0 - 0, 4, 2, 3
-        GenerateTetraGeometry(ref vertices, ExtractCorners(cube_center, corner_values, [0, 4, 2, 3]));
+        GenerateTetraGeometry(ref vertices, ExtractCorners(cube_center, cube_size, corner_values, [0, 4, 2, 3]));
         // tetra1 - 3, 7, 5, 4
-        GenerateTetraGeometry(ref vertices, ExtractCorners(cube_center, corner_values, [3, 7, 5, 4]));
+        GenerateTetraGeometry(ref vertices, ExtractCorners(cube_center, cube_size, corner_values, [3, 7, 5, 4]));
         // tetra2 - 1, 5, 4, 3
-        GenerateTetraGeometry(ref vertices, ExtractCorners(cube_center, corner_values, [1, 5, 4, 3]));
+        GenerateTetraGeometry(ref vertices, ExtractCorners(cube_center, cube_size, corner_values, [1, 5, 4, 3]));
         // tetra3 - 2, 6, 3, 4
-        GenerateTetraGeometry(ref vertices, ExtractCorners(cube_center, corner_values, [2, 6, 3, 4]));
+        GenerateTetraGeometry(ref vertices, ExtractCorners(cube_center, cube_size, corner_values, [2, 6, 3, 4]));
         // tetra4 - 0, 3, 1, 4
-        GenerateTetraGeometry(ref vertices, ExtractCorners(cube_center, corner_values, [0, 3, 1, 4]));
+        GenerateTetraGeometry(ref vertices, ExtractCorners(cube_center, cube_size, corner_values, [0, 3, 1, 4]));
         // tetra5 - 4, 7, 6, 3
-        GenerateTetraGeometry(ref vertices, ExtractCorners(cube_center, corner_values, [4, 7, 6, 3]));
+        GenerateTetraGeometry(ref vertices, ExtractCorners(cube_center, cube_size, corner_values, [4, 7, 6, 3]));
     }
 
     static readonly int edge_01 = 0;
@@ -238,18 +306,5 @@ public partial class AsteroidGenerator : MeshInstance3D
         // based on the lookup, add a selection of computed vertex candidates to the vertex array
         foreach (int i in vertex_selection)
             vertices.Add(candidates[i]);
-    }
-    static byte EvaluateScalarField(Vector3 cube_center, Func<Vector3, float> field_function, float threshold)
-    {
-        byte corner_eval = 0;
-        for(int i = 0; i < 8; i++)
-        {
-            if (field_function(cube_center + cube_corners[i]) > threshold)
-                corner_eval = (byte)(corner_eval | (0b1 << i));
-        }
-
-        GD.Print(cube_center + " => " + corner_eval);
-
-        return corner_eval;
     }
 }
