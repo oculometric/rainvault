@@ -20,6 +20,8 @@ using System.Diagnostics;
  *    |--- +x -y -z
  */
 
+// sphere demo with interp - 0.028 seconds
+
 [Tool]
 public partial class AsteroidGenerator : Node3D
 {
@@ -45,9 +47,33 @@ public partial class AsteroidGenerator : Node3D
 
     void RegenerateMesh()
     {
+        List<Tuple<float, float, float>> timings = new List<Tuple<float, float, float>>();
         if (target != null)
             target.Mesh = GenerateMesh((position) => 1.0f - ((position.X * position.X) + (position.Y * position.Y) + (position.Z * position.Z)),
-                threshold, resolution, offset, Vector3.One * 3.0f);
+                threshold, resolution, offset, Vector3.One * 3.0f, ref timings);
+        if (!Engine.IsEditorHint())
+        {
+            for (int i = 0; i < 20; i++)
+                GenerateMesh((position) => 1.0f - ((position.X * position.X) + (position.Y * position.Y) + (position.Z * position.Z)),
+                    0.0f, 0.0625f, Vector3.Zero, Vector3.One * 3.0f, ref timings);
+
+            float total_eval = 0.0f; float total_gen = 0.0f; float total_clean = 0.0f;
+            foreach (Tuple<float, float, float> t in timings)
+            {
+                total_eval += t.Item1;
+                total_gen += t.Item2;
+                total_clean += t.Item3;
+            }
+            total_eval /= timings.Count;
+            total_gen /= timings.Count;
+            total_clean /= timings.Count;
+            GD.Print("========> timing data for 20 iterations:");
+            GD.Print("=> eval: " + total_eval);
+            GD.Print("=> gen: " + total_gen);
+            GD.Print("=> clean: " + total_clean);
+            GD.Print("==> total: " + (total_eval + total_gen + total_clean));
+            GD.Print("(for sphere demo)");
+        }
     }
 
     struct VoxelMap
@@ -76,13 +102,20 @@ public partial class AsteroidGenerator : Node3D
             return threshold_map[x + (y * yStep) + (z * zStep)];
         }
 
+        public void ReadData(int x, int y, int z, out bool threshold, out float value)
+        {
+            int index = x + (y * yStep) + (z * zStep);
+            threshold = threshold_map[index];
+            value = value_map[index];
+        }
+
         public Vector3I GetSize()
         {
             return size;
         }
     }
 
-    public static ArrayMesh GenerateMesh(Func<Vector3, float> field_function, float threshold, float voxel_scale, Vector3 space_offset, Vector3 space_size)
+    public static ArrayMesh GenerateMesh(Func<Vector3, float> field_function, float threshold, float voxel_scale, Vector3 space_offset, Vector3 space_size, ref List<Tuple<float, float, float>> timings)
     {
         GD.Print("beginning MT mesh generation!!");
 
@@ -135,17 +168,28 @@ public partial class AsteroidGenerator : Node3D
                 for (int x = 0; x < voxel_count.X; x++)
                 {
                     // extract the corner values from the generated array
+                    bool tmp = false;
                     byte corner_values = 0;
-                    if (voxel_map.ReadThreshold(x + 1, y + 1, z + 1))   corner_values |= 0b00000001;
-                    if (voxel_map.ReadThreshold(x, y + 1, z + 1))       corner_values |= 0b00000010;
-                    if (voxel_map.ReadThreshold(x + 1, y, z + 1))       corner_values |= 0b00000100;
-                    if (voxel_map.ReadThreshold(x, y, z + 1))           corner_values |= 0b00001000;
-                    if (voxel_map.ReadThreshold(x + 1, y + 1, z))       corner_values |= 0b00010000;
-                    if (voxel_map.ReadThreshold(x, y + 1, z))           corner_values |= 0b00100000;
-                    if (voxel_map.ReadThreshold(x + 1, y, z))           corner_values |= 0b01000000;
-                    if (voxel_map.ReadThreshold(x, y, z))               corner_values |= 0b10000000;
+                    float[] corners = new float[8];
 
-                    GenerateCubeGeometry(ref vertices, voxel, voxel_scale, corner_values);
+                    voxel_map.ReadData(x + 1, y + 1, z + 1, out tmp, out corners[0]);
+                    if (tmp) corner_values |= 0b00000001;
+                    voxel_map.ReadData(x, y + 1, z + 1, out tmp, out corners[1]);
+                    if (tmp) corner_values |= 0b00000010;
+                    voxel_map.ReadData(x + 1, y, z + 1, out tmp, out corners[2]);
+                    if (tmp) corner_values |= 0b00000100;
+                    voxel_map.ReadData(x, y, z + 1, out tmp, out corners[3]);
+                    if (tmp) corner_values |= 0b00001000;
+                    voxel_map.ReadData(x + 1, y + 1, z, out tmp, out corners[4]);
+                    if (tmp) corner_values |= 0b00010000;
+                    voxel_map.ReadData(x, y + 1, z, out tmp, out corners[5]);
+                    if (tmp) corner_values |= 0b00100000;
+                    voxel_map.ReadData(x + 1, y, z, out tmp, out corners[6]);
+                    if (tmp) corner_values |= 0b01000000;
+                    voxel_map.ReadData(x, y, z, out tmp, out corners[7]);
+                    if (tmp) corner_values |= 0b10000000;
+
+                    GenerateCubeGeometry(ref vertices, voxel, voxel_scale, new Tuple<byte, float[]>(corner_values, corners), threshold);
                     voxel.X += voxel_scale;
                 }
                 voxel.Y += voxel_scale;
@@ -177,12 +221,14 @@ public partial class AsteroidGenerator : Node3D
             indices.Add(i);
         }
 
+        // TODO: merge by distance
+
         clean_timer.Stop();
         GD.Print("converted raw to clean mesh with " + used_vertices.Count + " verts and " + indices.Count + " indices.");
         
         GD.Print("generated voxel map of size " + voxel_count + "(" + (voxel_count.X * voxel_count.Y * voxel_count.Z) + ") in " + (eval_timer.Elapsed + gen_timer.Elapsed + clean_timer.Elapsed).TotalSeconds + " seconds");
-        GD.Print("eval: " + eval_timer.Elapsed.TotalSeconds + "; gen: " + eval_timer.Elapsed.TotalSeconds + "; clean: " + clean_timer.Elapsed.TotalSeconds);
-        // TODO: merge by distance
+        GD.Print("eval: " + eval_timer.Elapsed.TotalSeconds + "; gen: " + gen_timer.Elapsed.TotalSeconds + "; clean: " + clean_timer.Elapsed.TotalSeconds);
+        timings.Add(new Tuple<float, float, float>((float)eval_timer.Elapsed.TotalSeconds, (float)gen_timer.Elapsed.TotalSeconds, (float)clean_timer.Elapsed.TotalSeconds));
 
         // generate arraymesh
         Godot.Collections.Array surface_array = [];
@@ -209,50 +255,62 @@ public partial class AsteroidGenerator : Node3D
         new(-1, -1, -1)  // 7
     };
 
-    static Tuple<Vector3, bool> GetCorner(Vector3 center, float voxel_scale, byte values, int index)
+    static Tuple<Vector3, bool, float> GetCorner(Vector3 center, float voxel_scale, Tuple<byte, float[]> values, int index)
     {
-        return new Tuple<Vector3, bool>(center + (cube_corners[index] * voxel_scale * 0.5f), (values & (0b1 << index)) > 0);
+        return new Tuple<Vector3, bool, float>
+            (center + (cube_corners[index] * voxel_scale * 0.5f),
+            (values.Item1 & (0b1 << index)) > 0,
+            values.Item2[index]);
     }
 
-    static Tuple<Vector3, bool>[] ExtractCorners(Vector3 center, float voxel_scale, byte values, int[] indices)
+    static Tuple<Vector3, bool, float>[] ExtractCorners(Vector3 center, float voxel_scale, Tuple<byte, float[]> values, int[] indices)
     {
-        Tuple<Vector3, bool>[] arr = new Tuple<Vector3, bool>[indices.Length];
+        Tuple<Vector3, bool, float>[] arr = new Tuple<Vector3, bool, float>[indices.Length];
         for (int i = 0; i < indices.Length; i++)
             arr[i] = GetCorner(center, voxel_scale, values, indices[i]);
 
         return arr;
     }
 
-    static void GenerateCubeGeometry(ref List<Vector3> vertices, Vector3 cube_center, float cube_size, byte corner_values)
+    static void GenerateCubeGeometry(ref List<Vector3> vertices, Vector3 cube_center, float cube_size, Tuple<byte, float[]> corner_values, float threshold)
     {
         // evaluate the corners of the cube
         //byte corner_values = EvaluateScalarField(cube_center, field_function, threshold);
         // if the entire cube is inside or outside the field, there is no geometry to generate
-        if (corner_values == 0b00000000 || corner_values == 0b11111111)
+        if (corner_values.Item1 == 0b00000000 || corner_values.Item1 == 0b11111111)
             return;
 
         // generate geometry for each of the 6 tetrahedra inside the cube
 
         // tetra0 - 0, 4, 2, 3
-        GenerateTetraGeometry(ref vertices, ExtractCorners(cube_center, cube_size, corner_values, [0, 4, 2, 3]));
+        GenerateTetraGeometry(ref vertices, ExtractCorners(cube_center, cube_size, corner_values, [0, 4, 2, 3]), threshold);
         // tetra1 - 3, 7, 5, 4
-        GenerateTetraGeometry(ref vertices, ExtractCorners(cube_center, cube_size, corner_values, [3, 7, 5, 4]));
+        GenerateTetraGeometry(ref vertices, ExtractCorners(cube_center, cube_size, corner_values, [3, 7, 5, 4]), threshold);
         // tetra2 - 1, 5, 4, 3
-        GenerateTetraGeometry(ref vertices, ExtractCorners(cube_center, cube_size, corner_values, [1, 5, 4, 3]));
+        GenerateTetraGeometry(ref vertices, ExtractCorners(cube_center, cube_size, corner_values, [1, 5, 4, 3]), threshold);
         // tetra3 - 2, 6, 3, 4
-        GenerateTetraGeometry(ref vertices, ExtractCorners(cube_center, cube_size, corner_values, [2, 6, 3, 4]));
+        GenerateTetraGeometry(ref vertices, ExtractCorners(cube_center, cube_size, corner_values, [2, 6, 3, 4]), threshold);
         // tetra4 - 0, 3, 1, 4
-        GenerateTetraGeometry(ref vertices, ExtractCorners(cube_center, cube_size, corner_values, [0, 3, 1, 4]));
+        GenerateTetraGeometry(ref vertices, ExtractCorners(cube_center, cube_size, corner_values, [0, 3, 1, 4]), threshold);
         // tetra5 - 4, 7, 6, 3
-        GenerateTetraGeometry(ref vertices, ExtractCorners(cube_center, cube_size, corner_values, [4, 7, 6, 3]));
+        GenerateTetraGeometry(ref vertices, ExtractCorners(cube_center, cube_size, corner_values, [4, 7, 6, 3]), threshold);
     }
 
-    static readonly int edge_01 = 0;
-    static readonly int edge_12 = 1;
-    static readonly int edge_20 = 2;
-    static readonly int edge_03 = 3;
-    static readonly int edge_13 = 4;
-    static readonly int edge_23 = 5;
+    const int edge_01 = 0;
+    const int edge_12 = 1;
+    const int edge_20 = 2;
+    const int edge_03 = 3;
+    const int edge_13 = 4;
+    const int edge_23 = 5;
+    static readonly int[] edge_vs =
+    {
+        0, 1,
+        1, 2,
+        2, 0,
+        0, 3,
+        1, 3,
+        2, 3
+    };
     static readonly int[][] tetrahedron_patterns =
     {
         [ ],                                                        // pattern 0000 (i.e. all corners outside)
@@ -273,10 +331,8 @@ public partial class AsteroidGenerator : Node3D
         [ ],                                                        // pattern 1111 (i.e. all corners inside)
     };
 
-    static void GenerateTetraGeometry(ref List<Vector3> vertices, Tuple<Vector3, bool>[] corners)
+    static void GenerateTetraGeometry(ref List<Vector3> vertices, Tuple<Vector3, bool, float>[] corners, float threshold)
     {
-        // TODO: interpolation
-
         // this functions expects an array of four pairs of corner position and field presence
         // these should be ordered clockwise for one of the faces, followed by the fourth corner
 
@@ -291,20 +347,21 @@ public partial class AsteroidGenerator : Node3D
         if (corner_pattern == 0b00000000 || corner_pattern == 0b11111111)
             return;
 
-        // calculate the positions of the vertex candidates to be placed on each edge
-        Vector3[] candidates = new Vector3[6];
-        candidates[edge_01] = (corners[0].Item1 + corners[1].Item1) / 2;
-        candidates[edge_12] = (corners[1].Item1 + corners[2].Item1) / 2;
-        candidates[edge_20] = (corners[2].Item1 + corners[0].Item1) / 2;
-        candidates[edge_03] = (corners[0].Item1 + corners[3].Item1) / 2;
-        candidates[edge_13] = (corners[1].Item1 + corners[3].Item1) / 2;
-        candidates[edge_23] = (corners[2].Item1 + corners[3].Item1) / 2;
-
         // look up which sequence of vertices are to be used based on the evaluated sign changes
         int[] vertex_selection = tetrahedron_patterns[corner_pattern];
 
-        // based on the lookup, add a selection of computed vertex candidates to the vertex array
+        // based on the lookup, compute interpolated vertex positions using the value data of the voxel field
         foreach (int i in vertex_selection)
-            vertices.Add(candidates[i]);
+        {
+            int i1 = edge_vs[(i * 2) + 0];
+            int i2 = edge_vs[(i * 2) + 1];
+            Vector3 v1 = corners[i1].Item1;
+            Vector3 v2 = corners[i2].Item1;
+            float f1 = corners[i1].Item3;
+            float f2 = corners[i2].Item3;
+
+            float f = (threshold - f1) / (f2 - f1);
+            vertices.Add((f * v2) + ((1.0f - f) * v1));
+        }    
     }
 }
