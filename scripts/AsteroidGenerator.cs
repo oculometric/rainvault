@@ -2,6 +2,7 @@ using Godot;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Reflection;
 
 /*
  * 
@@ -202,29 +203,12 @@ public partial class AsteroidGenerator : Node3D
 
         Stopwatch clean_timer = Stopwatch.StartNew();
 
-        // convert a raw vertex array to a pair of (deduplicated) vertex and index arrays
-        Dictionary<Vector3, int> vertex_refs = new Dictionary<Vector3, int>();
-        List<Vector3> used_vertices = new List<Vector3>();
-        List<int> indices = new List<int>();
-        foreach (Vector3 vertex in vertices)
-        {
-            int i;
-            // if the vertex is not present, add it to the refmap and the new vertex array
-            if (!vertex_refs.TryGetValue(vertex, out i))
-            {
-                i = used_vertices.Count;
-                used_vertices.Add(vertex);
-                vertex_refs[vertex] = i;
-            }
-            
-            // add the index to the correct vertex
-            indices.Add(i);
-        }
-
-        // TODO: merge by distance
+        List<Vector3> final_verts;
+        List<int> final_inds;
+        DistanceCollapse(out final_verts, out final_inds, vertices, voxel_scale / 2.0f);
 
         clean_timer.Stop();
-        GD.Print("converted raw to clean mesh with " + used_vertices.Count + " verts and " + indices.Count + " indices.");
+        GD.Print("generated clean mesh with " + final_verts.Count + " verts and " + final_inds.Count + " indices.");
         
         GD.Print("generated voxel map of size " + voxel_count + "(" + (voxel_count.X * voxel_count.Y * voxel_count.Z) + ") in " + (eval_timer.Elapsed + gen_timer.Elapsed + clean_timer.Elapsed).TotalSeconds + " seconds");
         GD.Print("eval: " + eval_timer.Elapsed.TotalSeconds + "; gen: " + gen_timer.Elapsed.TotalSeconds + "; clean: " + clean_timer.Elapsed.TotalSeconds);
@@ -233,14 +217,122 @@ public partial class AsteroidGenerator : Node3D
         // generate arraymesh
         Godot.Collections.Array surface_array = [];
         surface_array.Resize((int)Mesh.ArrayType.Max);
-        surface_array[(int)Mesh.ArrayType.Vertex] = used_vertices.ToArray();
-        surface_array[(int)Mesh.ArrayType.Normal] = new Vector3[used_vertices.Count];
-        surface_array[(int)Mesh.ArrayType.TexUV] = new Vector2[used_vertices.Count];
-        surface_array[(int)Mesh.ArrayType.Index] = indices.ToArray();
+        surface_array[(int)Mesh.ArrayType.Vertex] = final_verts.ToArray();
+        surface_array[(int)Mesh.ArrayType.Normal] = new Vector3[final_verts.Count];
+        surface_array[(int)Mesh.ArrayType.TexUV] = new Vector2[final_verts.Count];
+        surface_array[(int)Mesh.ArrayType.Index] = final_inds.ToArray();
         ArrayMesh new_mesh = new ArrayMesh();
         new_mesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, surface_array);
 
         return new_mesh;
+    }
+
+    static int FindOtherTriangle(in List<int> indices, in List<int>[] vert_refs, int first_vert, int second_vert, int current_tri_index, ref List<int> second_vert_refs)
+    {
+        second_vert_refs.AddRange(vert_refs[second_vert]);
+
+        foreach (int svr in second_vert_refs)
+        {
+            int tri_start = (int)(Mathf.Floor((float)svr / 3.0f)) * 3;
+            if (tri_start == current_tri_index)
+                continue;
+
+            if (indices[tri_start] == first_vert
+                || indices[tri_start + 1] == first_vert
+                || indices[tri_start + 2] == first_vert)
+                return tri_start;
+        }
+
+        return -1;
+    }
+
+    static void DistanceCollapse(out List<Vector3> result_vertices, out List<int> result_indices, List<Vector3> input_vertices, float distance)
+    {
+        // convert a raw vertex array to a pair of (deduplicated) vertex and index arrays
+        Dictionary<Vector3, int> vertex_refs = new Dictionary<Vector3, int>();
+
+        // TODO: add all used vertices to vertex refs dictionary.
+        // index targets do not matter yet
+        // pick a random vertex, acquire a cluster (a bunch of other dictionary keys close by)
+        // mark all of them as already-used, and generate a result-vertices average value and assign
+        // its index to all of the dictionary entries
+        // repeat until we fail to find a new cluster
+
+
+
+        result_vertices = new List<Vector3>();
+        result_indices = new List<int>();
+        foreach (Vector3 vertex in input_vertices)
+        {
+            int i;
+            // if the vertex is not present, add it to the refmap and the new vertex array
+            if (!vertex_refs.TryGetValue(vertex, out i))
+            {
+                i = result_vertices.Count;
+                result_vertices.Add(vertex);
+                vertex_refs[vertex] = i;
+            }
+
+            // add the index to the correct vertex
+            result_indices.Add(i);
+        }
+
+        //List<int>[] vert_refs = new List<int>[result_vertices.Count];
+        //int r = 0;
+        //foreach (int index in result_indices)
+        //{
+        //    if (vert_refs[index] == null)
+        //        vert_refs[index] = new List<int>();
+        //    vert_refs[index].Add(r);
+        //    r++;
+        //}
+
+        //// iterate over triangles and check that they are not too tiny (edge lengths)
+        //List<int> second_vert_refs = new List<int>();
+        //float d2 = distance * distance;
+        //for (int i = 0; i < result_indices.Count; i += 3)
+        //{
+        //    // check if the triangle has a too-short edge
+        //    int[] pairs = { result_indices[i], result_indices[i+1],
+        //                    result_indices[i+1], result_indices[i+2],
+        //                    result_indices[i+2], result_indices[i] };
+        //    float shortest_edge_len = float.PositiveInfinity;
+        //    int shortest_edge_index = 0;
+        //    for (int k = 0; k < 3; k++)
+        //    {
+        //        float len = result_vertices[pairs[k * 2]].DistanceSquaredTo(result_vertices[pairs[(k * 2) + 1]]);
+        //        if (len < shortest_edge_len)
+        //        {
+        //            shortest_edge_len = len;
+        //            shortest_edge_index = k;
+        //        }
+        //    }
+        //    if (shortest_edge_len > d2)
+        //        continue;
+
+        //    // if so, find the other triangle that has this edge (pair of verts)
+        //    // and find occurrences of the second vertex
+        //    second_vert_refs.Clear();
+        //    int first_vert = pairs[(shortest_edge_index * 2)];
+        //    int second_vert = pairs[(shortest_edge_index * 2) + 1];
+        //    int j = FindOtherTriangle(in result_indices, vert_refs, first_vert, second_vert, i, ref second_vert_refs);
+
+        //    // move the first vertex to the midpoint of the edge
+        //    result_vertices[first_vert] = (result_vertices[first_vert] + result_vertices[second_vert]) * 0.5f;
+        //    result_vertices[second_vert] = result_vertices[first_vert];
+
+        //    // replace occurrences of the second vertex with the first vertex
+        //    //foreach (int k in second_vert_refs)
+        //    //    result_indices[k] = first_vert;
+
+        //    // remove this triangle and the other from the array, and decrement i by either 3 or 6 (depending if the other triangle was before us)
+        //    //result_indices.RemoveRange(i, 3);
+        //    //if (j != -1)
+        //    //    result_indices.RemoveRange(j < i ? j : j - 3, 3);
+        //    //i -= (j < i && j >= 0) ? 6 : 3;
+        //}
+
+        // TODO: remove unused vertices and shift references backward
     }
 
     static readonly Vector3[] cube_corners =
@@ -255,19 +347,16 @@ public partial class AsteroidGenerator : Node3D
         new(-1, -1, -1)  // 7
     };
 
-    static Tuple<Vector3, bool, float> GetCorner(Vector3 center, float voxel_scale, Tuple<byte, float[]> values, int index)
-    {
-        return new Tuple<Vector3, bool, float>
-            (center + (cube_corners[index] * voxel_scale * 0.5f),
-            (values.Item1 & (0b1 << index)) > 0,
-            values.Item2[index]);
-    }
-
     static Tuple<Vector3, bool, float>[] ExtractCorners(Vector3 center, float voxel_scale, Tuple<byte, float[]> values, int[] indices)
     {
         Tuple<Vector3, bool, float>[] arr = new Tuple<Vector3, bool, float>[indices.Length];
         for (int i = 0; i < indices.Length; i++)
-            arr[i] = GetCorner(center, voxel_scale, values, indices[i]);
+        {
+            arr[i] = new Tuple<Vector3, bool, float>
+                (center + (cube_corners[indices[i]] * voxel_scale * 0.5f),
+                (values.Item1 & (0b1 << indices[i])) > 0,
+                values.Item2[indices[i]]);
+        }
 
         return arr;
     }
