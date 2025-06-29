@@ -43,6 +43,9 @@ public partial class AsteroidGenerator : Node3D
     [Export]
     public Vector3 offset { get => _offset; set { _offset = value; RegenerateMesh(); } }
     private Vector3 _offset = Vector3.Zero;
+    [Export]
+    public float merge_distance_factor { get => _merge_distance_factor; set { _merge_distance_factor = value; RegenerateMesh(); } }
+    private float _merge_distance_factor = 1.414f;
 
     [Export]
     public MeshInstance3D target;
@@ -52,12 +55,12 @@ public partial class AsteroidGenerator : Node3D
         List<Tuple<float, float, float>> timings = new List<Tuple<float, float, float>>();
         if (target != null)
             target.Mesh = GenerateMesh((position) => 1.0f - ((position.X * position.X) + (position.Y * position.Y) + (position.Z * position.Z)),
-                threshold, resolution, offset, Vector3.One * 3.0f, ref timings);
+                threshold, resolution, merge_distance_factor, offset, Vector3.One * 3.0f, ref timings);
         if (!Engine.IsEditorHint())
         {
             for (int i = 0; i < 20; i++)
                 GenerateMesh((position) => 1.0f - ((position.X * position.X) + (position.Y * position.Y) + (position.Z * position.Z)),
-                    0.0f, 0.0625f, Vector3.Zero, Vector3.One * 3.0f, ref timings);
+                    0.0f, 0.0625f, merge_distance_factor, Vector3.Zero, Vector3.One * 3.0f, ref timings);
 
             float total_eval = 0.0f; float total_gen = 0.0f; float total_clean = 0.0f;
             foreach (Tuple<float, float, float> t in timings)
@@ -117,7 +120,7 @@ public partial class AsteroidGenerator : Node3D
         }
     }
 
-    public static ArrayMesh GenerateMesh(Func<Vector3, float> field_function, float threshold, float voxel_scale, Vector3 space_offset, Vector3 space_size, ref List<Tuple<float, float, float>> timings)
+    public static ArrayMesh GenerateMesh(Func<Vector3, float> field_function, float threshold, float voxel_scale, float merge_distance_factor, Vector3 space_offset, Vector3 space_size, ref List<Tuple<float, float, float>> timings)
     {
         GD.Print("beginning MT mesh generation!!");
 
@@ -206,7 +209,7 @@ public partial class AsteroidGenerator : Node3D
 
         List<Vector3> final_verts;
         List<int> final_inds;
-        DistanceCollapse(out final_verts, out final_inds, vertices, voxel_scale);
+        DistanceCollapse(out final_verts, out final_inds, vertices, voxel_scale * merge_distance_factor);
 
         clean_timer.Stop();
         GD.Print("generated clean mesh with " + final_verts.Count + " verts and " + final_inds.Count + " indices.");
@@ -244,40 +247,49 @@ public partial class AsteroidGenerator : Node3D
 
         // convert a raw vertex array to a pair of (deduplicated) vertex and index arrays
         Dictionary<Vector3, int> vertex_refs = new Dictionary<Vector3, int>(/*new VectorComparer()*/);
-        LinkedList<Vector3> unmarked_verts = new LinkedList<Vector3>(/*new VectorComparer()*/);
+        LinkedList<Vector3> unmarked_verts = new LinkedList<Vector3>();
 
         // add all used vertices to vertex refs dictionary.
         foreach (Vector3 vertex in input_vertices)
-        {
             vertex_refs[vertex] = -1;
-            unmarked_verts.AddLast(vertex);
-        }
+        foreach (KeyValuePair<Vector3, int> vertex in vertex_refs)
+            unmarked_verts.AddLast(vertex.Key);
 
+        // perform proximity clustering
         while (unmarked_verts.Count > 0)
         {
-            // select unmarked vertex
+            // select unmarked vertex, pointing its index to where the new vertex will be
             Vector3 start_vert = unmarked_verts.First.Value;
+            int index = result_vertices.Count;
+            vertex_refs[start_vert] = index;
             unmarked_verts.RemoveFirst();
 
             // collect a cluster of nearby verts, marking each as used
             Vector3 sum_position = start_vert;
             int total = 1;
-            int index = result_vertices.Count;
             LinkedListNode<Vector3> lln = unmarked_verts.First;
             while (lln != null)
             {
-                // TODO: faster rejection here
+                // calculate individual differences to perform early rejection
                 float dx = lln.Value.X - start_vert.X;
-                if (Mathf.Abs(dx) > distance) { lln = lln.Next; continue; }
+                if (dx > distance) { lln = lln.Next; continue; }
+                if (dx < -distance) { lln = lln.Next; continue; }
                 float dy = lln.Value.Y - start_vert.Y;
-                if (Mathf.Abs(dy) > distance) { lln = lln.Next; continue; }
+                if (dy > distance) { lln = lln.Next; continue; }
+                if (dy < -distance) { lln = lln.Next; continue; }
                 float dz = lln.Value.Z - start_vert.Z;
-                if (Mathf.Abs(dz) > distance) { lln = lln.Next; continue; }
+                if (dz > distance) { lln = lln.Next; continue; }
+                if (dz < -distance) { lln = lln.Next; continue; }
                 if (((dx * dx) + (dy * dy) + (dz * dz)) < d2)
                 {
+                    // set the vertex ref for this vertex position to point to
+                    // the last vertex in the result vertex array
                     vertex_refs[lln.Value] = index;
+                    // contribute to the position sum
                     sum_position += lln.Value;
+                    // increment the number of vertices clustered
                     total++;
+                    // remove this node from the linked list
                     LinkedListNode<Vector3> old = lln;
                     lln = lln.Next;
                     unmarked_verts.Remove(old);
@@ -286,16 +298,21 @@ public partial class AsteroidGenerator : Node3D
                     lln = lln.Next;
             }
 
-            // create resulting vertex and point to it with the vertex refs
-            result_vertices.Add(sum_position / total);
+            // create the resulting vertex
+            result_vertices.Add(((sum_position / total) + start_vert) * 0.5f);
         }
 
         // build the index array
+        int r = 0;
         int i = 0;
         foreach (Vector3 vertex in input_vertices)
         {
-            result_indices.Add(vertex_refs[vertex]);
+            int index = vertex_refs[vertex];
+            result_indices.Add(index);
             i++;
+
+            if (index < 0 || index >= result_vertices.Count)
+                GD.Print("oops");
 
             if (i == 3)
             {
@@ -305,9 +322,13 @@ public partial class AsteroidGenerator : Node3D
                 int i2 = result_indices[result_indices.Count - 1];
 
                 if (i0 == i1 || i0 == i2 || i1 == i2)
+                {
                     result_indices.RemoveRange(result_indices.Count - 3, 3);
+                    r++;
+                }
             }
         }
+        GD.Print("removed " + r + " degenerate faces aka " + (r * 3) + " indices");
     }
 
     static readonly Vector3[] cube_corners =
