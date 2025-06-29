@@ -2,6 +2,7 @@ using Godot;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
 
 /*
@@ -205,7 +206,7 @@ public partial class AsteroidGenerator : Node3D
 
         List<Vector3> final_verts;
         List<int> final_inds;
-        DistanceCollapse(out final_verts, out final_inds, vertices, voxel_scale / 2.0f);
+        DistanceCollapse(out final_verts, out final_inds, vertices, voxel_scale);
 
         clean_timer.Stop();
         GD.Print("generated clean mesh with " + final_verts.Count + " verts and " + final_inds.Count + " indices.");
@@ -227,112 +228,86 @@ public partial class AsteroidGenerator : Node3D
         return new_mesh;
     }
 
-    static int FindOtherTriangle(in List<int> indices, in List<int>[] vert_refs, int first_vert, int second_vert, int current_tri_index, ref List<int> second_vert_refs)
+    class VectorComparer : IComparer<Vector3>
     {
-        second_vert_refs.AddRange(vert_refs[second_vert]);
-
-        foreach (int svr in second_vert_refs)
+        public int Compare(Vector3 a, Vector3 b)
         {
-            int tri_start = (int)(Mathf.Floor((float)svr / 3.0f)) * 3;
-            if (tri_start == current_tri_index)
-                continue;
-
-            if (indices[tri_start] == first_vert
-                || indices[tri_start + 1] == first_vert
-                || indices[tri_start + 2] == first_vert)
-                return tri_start;
+            return ((a.X > b.X) && (a.Y > b.Y) && (a.Z > b.Z)) ? 1 : 0;
         }
-
-        return -1;
     }
 
     static void DistanceCollapse(out List<Vector3> result_vertices, out List<int> result_indices, List<Vector3> input_vertices, float distance)
     {
-        // convert a raw vertex array to a pair of (deduplicated) vertex and index arrays
-        Dictionary<Vector3, int> vertex_refs = new Dictionary<Vector3, int>();
-
-        // TODO: add all used vertices to vertex refs dictionary.
-        // index targets do not matter yet
-        // pick a random vertex, acquire a cluster (a bunch of other dictionary keys close by)
-        // mark all of them as already-used, and generate a result-vertices average value and assign
-        // its index to all of the dictionary entries
-        // repeat until we fail to find a new cluster
-
-
-
         result_vertices = new List<Vector3>();
         result_indices = new List<int>();
+        float d2 = distance * distance;
+
+        // convert a raw vertex array to a pair of (deduplicated) vertex and index arrays
+        Dictionary<Vector3, int> vertex_refs = new Dictionary<Vector3, int>(/*new VectorComparer()*/);
+        LinkedList<Vector3> unmarked_verts = new LinkedList<Vector3>(/*new VectorComparer()*/);
+
+        // add all used vertices to vertex refs dictionary.
         foreach (Vector3 vertex in input_vertices)
         {
-            int i;
-            // if the vertex is not present, add it to the refmap and the new vertex array
-            if (!vertex_refs.TryGetValue(vertex, out i))
-            {
-                i = result_vertices.Count;
-                result_vertices.Add(vertex);
-                vertex_refs[vertex] = i;
-            }
-
-            // add the index to the correct vertex
-            result_indices.Add(i);
+            vertex_refs[vertex] = -1;
+            unmarked_verts.AddLast(vertex);
         }
 
-        //List<int>[] vert_refs = new List<int>[result_vertices.Count];
-        //int r = 0;
-        //foreach (int index in result_indices)
-        //{
-        //    if (vert_refs[index] == null)
-        //        vert_refs[index] = new List<int>();
-        //    vert_refs[index].Add(r);
-        //    r++;
-        //}
+        while (unmarked_verts.Count > 0)
+        {
+            // select unmarked vertex
+            Vector3 start_vert = unmarked_verts.First.Value;
+            unmarked_verts.RemoveFirst();
 
-        //// iterate over triangles and check that they are not too tiny (edge lengths)
-        //List<int> second_vert_refs = new List<int>();
-        //float d2 = distance * distance;
-        //for (int i = 0; i < result_indices.Count; i += 3)
-        //{
-        //    // check if the triangle has a too-short edge
-        //    int[] pairs = { result_indices[i], result_indices[i+1],
-        //                    result_indices[i+1], result_indices[i+2],
-        //                    result_indices[i+2], result_indices[i] };
-        //    float shortest_edge_len = float.PositiveInfinity;
-        //    int shortest_edge_index = 0;
-        //    for (int k = 0; k < 3; k++)
-        //    {
-        //        float len = result_vertices[pairs[k * 2]].DistanceSquaredTo(result_vertices[pairs[(k * 2) + 1]]);
-        //        if (len < shortest_edge_len)
-        //        {
-        //            shortest_edge_len = len;
-        //            shortest_edge_index = k;
-        //        }
-        //    }
-        //    if (shortest_edge_len > d2)
-        //        continue;
+            // collect a cluster of nearby verts, marking each as used
+            Vector3 sum_position = start_vert;
+            int total = 1;
+            int index = result_vertices.Count;
+            LinkedListNode<Vector3> lln = unmarked_verts.First;
+            while (lln != null)
+            {
+                // TODO: faster rejection here
+                float dx = lln.Value.X - start_vert.X;
+                if (Mathf.Abs(dx) > distance) { lln = lln.Next; continue; }
+                float dy = lln.Value.Y - start_vert.Y;
+                if (Mathf.Abs(dy) > distance) { lln = lln.Next; continue; }
+                float dz = lln.Value.Z - start_vert.Z;
+                if (Mathf.Abs(dz) > distance) { lln = lln.Next; continue; }
+                if (((dx * dx) + (dy * dy) + (dz * dz)) < d2)
+                {
+                    vertex_refs[lln.Value] = index;
+                    sum_position += lln.Value;
+                    total++;
+                    LinkedListNode<Vector3> old = lln;
+                    lln = lln.Next;
+                    unmarked_verts.Remove(old);
+                }
+                else
+                    lln = lln.Next;
+            }
 
-        //    // if so, find the other triangle that has this edge (pair of verts)
-        //    // and find occurrences of the second vertex
-        //    second_vert_refs.Clear();
-        //    int first_vert = pairs[(shortest_edge_index * 2)];
-        //    int second_vert = pairs[(shortest_edge_index * 2) + 1];
-        //    int j = FindOtherTriangle(in result_indices, vert_refs, first_vert, second_vert, i, ref second_vert_refs);
+            // create resulting vertex and point to it with the vertex refs
+            result_vertices.Add(sum_position / total);
+        }
 
-        //    // move the first vertex to the midpoint of the edge
-        //    result_vertices[first_vert] = (result_vertices[first_vert] + result_vertices[second_vert]) * 0.5f;
-        //    result_vertices[second_vert] = result_vertices[first_vert];
+        // build the index array
+        int i = 0;
+        foreach (Vector3 vertex in input_vertices)
+        {
+            result_indices.Add(vertex_refs[vertex]);
+            i++;
 
-        //    // replace occurrences of the second vertex with the first vertex
-        //    //foreach (int k in second_vert_refs)
-        //    //    result_indices[k] = first_vert;
+            if (i == 3)
+            {
+                i = 0;
+                int i0 = result_indices[result_indices.Count - 3];
+                int i1 = result_indices[result_indices.Count - 2];
+                int i2 = result_indices[result_indices.Count - 1];
 
-        //    // remove this triangle and the other from the array, and decrement i by either 3 or 6 (depending if the other triangle was before us)
-        //    //result_indices.RemoveRange(i, 3);
-        //    //if (j != -1)
-        //    //    result_indices.RemoveRange(j < i ? j : j - 3, 3);
-        //    //i -= (j < i && j >= 0) ? 6 : 3;
-        //}
-
-        // TODO: remove unused vertices and shift references backward
+                if (i0 == i1 || i0 == i2 || i1 == i2)
+                    result_indices.RemoveRange(result_indices.Count - 3, 3);
+            }
+        }
     }
 
     static readonly Vector3[] cube_corners =
