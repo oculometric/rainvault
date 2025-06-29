@@ -2,8 +2,6 @@ using Godot;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Reflection;
 
 /*
  * 
@@ -21,8 +19,6 @@ using System.Reflection;
  *    | |--- +x +y -z
  *    |--- +x -y -z
  */
-
-// sphere demo with interp - 0.028 seconds
 
 [Tool]
 public partial class MeshVoxeliser : Node3D
@@ -55,33 +51,33 @@ public partial class MeshVoxeliser : Node3D
 
     void RegenerateMesh()
     {
-        List<Tuple<float, float, float>> timings = new List<Tuple<float, float, float>>();
+        //List<Tuple<float, float, float>> timings = new List<Tuple<float, float, float>>();
         if (target != null)
             target.Mesh = GenerateMesh((position) => 1.0f - ((position.X * position.X) + (position.Y * position.Y) + (position.Z * position.Z)),
-                threshold, resolution, merge_distance_factor, offset, size, ref timings);
-        if (!Engine.IsEditorHint())
-        {
-            for (int i = 0; i < 20; i++)
-                GenerateMesh((position) => 1.0f - ((position.X * position.X) + (position.Y * position.Y) + (position.Z * position.Z)),
-                    0.0f, 0.0625f, merge_distance_factor, Vector3.Zero, Vector3.One * 3.0f, ref timings);
+                threshold, resolution, merge_distance_factor, offset, size);//, ref timings);
+        //if (!Engine.IsEditorHint())
+        //{
+        //    for (int i = 0; i < 20; i++)
+        //        GenerateMesh((position) => 1.0f - ((position.X * position.X) + (position.Y * position.Y) + (position.Z * position.Z)),
+        //            0.0f, 0.0625f, merge_distance_factor, Vector3.Zero, Vector3.One * 3.0f);//, ref timings);
 
-            float total_eval = 0.0f; float total_gen = 0.0f; float total_clean = 0.0f;
-            foreach (Tuple<float, float, float> t in timings)
-            {
-                total_eval += t.Item1;
-                total_gen += t.Item2;
-                total_clean += t.Item3;
-            }
-            total_eval /= timings.Count;
-            total_gen /= timings.Count;
-            total_clean /= timings.Count;
-            GD.Print("========> timing data for 20 iterations:");
-            GD.Print("=> eval: " + total_eval);
-            GD.Print("=> gen: " + total_gen);
-            GD.Print("=> clean: " + total_clean);
-            GD.Print("==> total: " + (total_eval + total_gen + total_clean));
-            GD.Print("(for sphere demo)");
-        }
+        //    //float total_eval = 0.0f; float total_gen = 0.0f; float total_clean = 0.0f;
+        //    //foreach (Tuple<float, float, float> t in timings)
+        //    //{
+        //    //    total_eval += t.Item1;
+        //    //    total_gen += t.Item2;
+        //    //    total_clean += t.Item3;
+        //    //}
+        //    //total_eval /= timings.Count;
+        //    //total_gen /= timings.Count;
+        //    //total_clean /= timings.Count;
+        //    //GD.Print("========> timing data for 20 iterations:");
+        //    //GD.Print("=> eval: " + total_eval);
+        //    //GD.Print("=> gen: " + total_gen);
+        //    //GD.Print("=> clean: " + total_clean);
+        //    //GD.Print("==> total: " + (total_eval + total_gen + total_clean));
+        //    //GD.Print("(for sphere demo)");
+        //}
     }
 
     struct VoxelMap
@@ -123,7 +119,7 @@ public partial class MeshVoxeliser : Node3D
         }
     }
 
-    public static ArrayMesh GenerateMesh(Func<Vector3, float> field_function, float threshold, float voxel_scale, float merge_distance_factor, Vector3 space_offset, Vector3 space_size, ref List<Tuple<float, float, float>> timings)
+    public static ArrayMesh GenerateMesh(Func<Vector3, float> field_function, float threshold, float voxel_scale, float merge_distance_factor, Vector3 space_offset, Vector3 space_size)//, ref List<Tuple<float, float, float>> timings)
     {
         GD.Print("beginning MT mesh generation!!");
 
@@ -221,7 +217,7 @@ public partial class MeshVoxeliser : Node3D
 
         GD.Print("generated voxel map of size " + voxel_count + "(" + (voxel_count.X * voxel_count.Y * voxel_count.Z) + ") in " + (eval_timer.Elapsed + gen_timer.Elapsed + clean_timer.Elapsed).TotalSeconds + " seconds");
         GD.Print("eval: " + eval_timer.Elapsed.TotalSeconds + "; gen: " + gen_timer.Elapsed.TotalSeconds + "; clean: " + clean_timer.Elapsed.TotalSeconds);
-        timings.Add(new Tuple<float, float, float>((float)eval_timer.Elapsed.TotalSeconds, (float)gen_timer.Elapsed.TotalSeconds, (float)clean_timer.Elapsed.TotalSeconds));
+        //timings.Add(new Tuple<float, float, float>((float)eval_timer.Elapsed.TotalSeconds, (float)gen_timer.Elapsed.TotalSeconds, (float)clean_timer.Elapsed.TotalSeconds));
 
         // generate arraymesh
         Godot.Collections.Array surface_array = [];

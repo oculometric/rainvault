@@ -7,8 +7,8 @@
 render_priority = 0
 shader = ExtResource("1_h2ina")
 shader_parameter/albedo_tex = ExtResource("2_h2ina")
-shader_parameter/use_triplanar = false
-shader_parameter/triplanar_scale = 1.0
+shader_parameter/use_triplanar = true
+shader_parameter/triplanar_scale = 12.0
 shader_parameter/randomise_uv_offset = true
 shader_parameter/randomise_resolution = 640.0
 shader_parameter/randomise_lock_y = false
