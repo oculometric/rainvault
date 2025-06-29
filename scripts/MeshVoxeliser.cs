@@ -25,7 +25,7 @@ using System.Reflection;
 // sphere demo with interp - 0.028 seconds
 
 [Tool]
-public partial class AsteroidGenerator : Node3D
+public partial class MeshVoxeliser : Node3D
 {
     public override void _Ready()
     {
@@ -44,6 +44,9 @@ public partial class AsteroidGenerator : Node3D
     public Vector3 offset { get => _offset; set { _offset = value; RegenerateMesh(); } }
     private Vector3 _offset = Vector3.Zero;
     [Export]
+    public Vector3 size { get => _size; set { _size = value; RegenerateMesh(); } }
+    private Vector3 _size = Vector3.One * 3.0f;
+    [Export]
     public float merge_distance_factor { get => _merge_distance_factor; set { _merge_distance_factor = value; RegenerateMesh(); } }
     private float _merge_distance_factor = 1.414f;
 
@@ -55,7 +58,7 @@ public partial class AsteroidGenerator : Node3D
         List<Tuple<float, float, float>> timings = new List<Tuple<float, float, float>>();
         if (target != null)
             target.Mesh = GenerateMesh((position) => 1.0f - ((position.X * position.X) + (position.Y * position.Y) + (position.Z * position.Z)),
-                threshold, resolution, merge_distance_factor, offset, Vector3.One * 3.0f, ref timings);
+                threshold, resolution, merge_distance_factor, offset, size, ref timings);
         if (!Engine.IsEditorHint())
         {
             for (int i = 0; i < 20; i++)
