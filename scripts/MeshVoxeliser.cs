@@ -210,13 +210,15 @@ public partial class MeshVoxeliser : Node3D
 
         Stopwatch clean_timer = Stopwatch.StartNew();
 
-        List<Vector3> final_verts;
-        List<int> final_inds;
-        DistanceCollapse(out final_verts, out final_inds, vertices, voxel_scale * merge_distance_factor);
+        List<Vector3> verts;
+        List<int> inds;
+        DistanceCollapse(out verts, out inds, vertices, voxel_scale * merge_distance_factor);
+        List<Vector3> norms;
+        GenerateSmoothNormals(in verts, in inds, out norms);
 
         clean_timer.Stop();
-        GD.Print("generated clean mesh with " + final_verts.Count + " verts and " + final_inds.Count + " indices.");
-        
+        GD.Print("generated clean mesh with " + verts.Count + " verts and " + inds.Count + " indices.");
+
         GD.Print("generated voxel map of size " + voxel_count + "(" + (voxel_count.X * voxel_count.Y * voxel_count.Z) + ") in " + (eval_timer.Elapsed + gen_timer.Elapsed + clean_timer.Elapsed).TotalSeconds + " seconds");
         GD.Print("eval: " + eval_timer.Elapsed.TotalSeconds + "; gen: " + gen_timer.Elapsed.TotalSeconds + "; clean: " + clean_timer.Elapsed.TotalSeconds);
         timings.Add(new Tuple<float, float, float>((float)eval_timer.Elapsed.TotalSeconds, (float)gen_timer.Elapsed.TotalSeconds, (float)clean_timer.Elapsed.TotalSeconds));
@@ -224,114 +226,14 @@ public partial class MeshVoxeliser : Node3D
         // generate arraymesh
         Godot.Collections.Array surface_array = [];
         surface_array.Resize((int)Mesh.ArrayType.Max);
-        surface_array[(int)Mesh.ArrayType.Vertex] = final_verts.ToArray();
-        surface_array[(int)Mesh.ArrayType.Normal] = new Vector3[final_verts.Count];
-        surface_array[(int)Mesh.ArrayType.TexUV] = new Vector2[final_verts.Count];
-        surface_array[(int)Mesh.ArrayType.Index] = final_inds.ToArray();
+        surface_array[(int)Mesh.ArrayType.Vertex] = verts.ToArray();
+        surface_array[(int)Mesh.ArrayType.Normal] = norms.ToArray();
+        surface_array[(int)Mesh.ArrayType.TexUV] = new Vector2[verts.Count];
+        surface_array[(int)Mesh.ArrayType.Index] = inds.ToArray();
         ArrayMesh new_mesh = new ArrayMesh();
         new_mesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, surface_array);
 
         return new_mesh;
-    }
-
-    class VectorComparer : IComparer<Vector3>
-    {
-        public int Compare(Vector3 a, Vector3 b)
-        {
-            return ((a.X > b.X) && (a.Y > b.Y) && (a.Z > b.Z)) ? 1 : 0;
-        }
-    }
-
-    static void DistanceCollapse(out List<Vector3> result_vertices, out List<int> result_indices, List<Vector3> input_vertices, float distance)
-    {
-        result_vertices = new List<Vector3>();
-        result_indices = new List<int>();
-        float d2 = distance * distance;
-
-        // convert a raw vertex array to a pair of (deduplicated) vertex and index arrays
-        Dictionary<Vector3, int> vertex_refs = new Dictionary<Vector3, int>(/*new VectorComparer()*/);
-        LinkedList<Vector3> unmarked_verts = new LinkedList<Vector3>();
-
-        // add all used vertices to vertex refs dictionary.
-        foreach (Vector3 vertex in input_vertices)
-            vertex_refs[vertex] = -1;
-        foreach (KeyValuePair<Vector3, int> vertex in vertex_refs)
-            unmarked_verts.AddLast(vertex.Key);
-
-        // perform proximity clustering
-        while (unmarked_verts.Count > 0)
-        {
-            // select unmarked vertex, pointing its index to where the new vertex will be
-            Vector3 start_vert = unmarked_verts.First.Value;
-            int index = result_vertices.Count;
-            vertex_refs[start_vert] = index;
-            unmarked_verts.RemoveFirst();
-
-            // collect a cluster of nearby verts, marking each as used
-            Vector3 sum_position = start_vert;
-            int total = 1;
-            LinkedListNode<Vector3> lln = unmarked_verts.First;
-            while (lln != null)
-            {
-                // calculate individual differences to perform early rejection
-                float dx = lln.Value.X - start_vert.X;
-                if (dx > distance) { lln = lln.Next; continue; }
-                if (dx < -distance) { lln = lln.Next; continue; }
-                float dy = lln.Value.Y - start_vert.Y;
-                if (dy > distance) { lln = lln.Next; continue; }
-                if (dy < -distance) { lln = lln.Next; continue; }
-                float dz = lln.Value.Z - start_vert.Z;
-                if (dz > distance) { lln = lln.Next; continue; }
-                if (dz < -distance) { lln = lln.Next; continue; }
-                if (((dx * dx) + (dy * dy) + (dz * dz)) < d2)
-                {
-                    // set the vertex ref for this vertex position to point to
-                    // the last vertex in the result vertex array
-                    vertex_refs[lln.Value] = index;
-                    // contribute to the position sum
-                    sum_position += lln.Value;
-                    // increment the number of vertices clustered
-                    total++;
-                    // remove this node from the linked list
-                    LinkedListNode<Vector3> old = lln;
-                    lln = lln.Next;
-                    unmarked_verts.Remove(old);
-                }
-                else
-                    lln = lln.Next;
-            }
-
-            // create the resulting vertex
-            result_vertices.Add(((sum_position / total) + start_vert) * 0.5f);
-        }
-
-        // build the index array
-        int r = 0;
-        int i = 0;
-        foreach (Vector3 vertex in input_vertices)
-        {
-            int index = vertex_refs[vertex];
-            result_indices.Add(index);
-            i++;
-
-            if (index < 0 || index >= result_vertices.Count)
-                GD.Print("oops");
-
-            if (i == 3)
-            {
-                i = 0;
-                int i0 = result_indices[result_indices.Count - 3];
-                int i1 = result_indices[result_indices.Count - 2];
-                int i2 = result_indices[result_indices.Count - 1];
-
-                if (i0 == i1 || i0 == i2 || i1 == i2)
-                {
-                    result_indices.RemoveRange(result_indices.Count - 3, 3);
-                    r++;
-                }
-            }
-        }
-        GD.Print("removed " + r + " degenerate faces aka " + (r * 3) + " indices");
     }
 
     static readonly Vector3[] cube_corners =
@@ -451,5 +353,134 @@ public partial class MeshVoxeliser : Node3D
             float f = (threshold - f1) / (f2 - f1);
             vertices.Add((f * v2) + ((1.0f - f) * v1));
         }    
+    }
+
+    static void DistanceCollapse(out List<Vector3> result_vertices, out List<int> result_indices, List<Vector3> input_vertices, float distance)
+    {
+        result_vertices = new List<Vector3>();
+        result_vertices.EnsureCapacity(input_vertices.Count / 6);
+        result_indices = new List<int>();
+        result_indices.EnsureCapacity(input_vertices.Count);
+        float d2 = distance * distance;
+
+        // convert a raw vertex array to a pair of (deduplicated) vertex and index arrays
+        Dictionary<Vector3, int> vertex_refs = new Dictionary<Vector3, int>(/*new VectorComparer()*/);
+        vertex_refs.EnsureCapacity(input_vertices.Count / 3);
+        LinkedList<Vector3> unmarked_verts = new LinkedList<Vector3>();
+
+        // add all used vertices to vertex refs dictionary.
+        foreach (Vector3 vertex in input_vertices)
+            vertex_refs[vertex] = -1;
+        foreach (KeyValuePair<Vector3, int> vertex in vertex_refs)
+            unmarked_verts.AddLast(vertex.Key);
+
+        // perform proximity clustering
+        while (unmarked_verts.Count > 0)
+        {
+            // select unmarked vertex, pointing its index to where the new vertex will be
+            Vector3 start_vert = unmarked_verts.First.Value;
+            int index = result_vertices.Count;
+            vertex_refs[start_vert] = index;
+            unmarked_verts.RemoveFirst();
+
+            // collect a cluster of nearby verts, marking each as used
+            Vector3 sum_position = start_vert;
+            int total = 1;
+            LinkedListNode<Vector3> lln = unmarked_verts.First;
+            while (lln != null)
+            {
+                // calculate individual differences to perform early rejection
+                float dx = lln.Value.X - start_vert.X;
+                if (dx > distance) { lln = lln.Next; continue; }
+                if (dx < -distance) { lln = lln.Next; continue; }
+                float dy = lln.Value.Y - start_vert.Y;
+                if (dy > distance) { lln = lln.Next; continue; }
+                if (dy < -distance) { lln = lln.Next; continue; }
+                float dz = lln.Value.Z - start_vert.Z;
+                if (dz > distance) { lln = lln.Next; continue; }
+                if (dz < -distance) { lln = lln.Next; continue; }
+                if (((dx * dx) + (dy * dy) + (dz * dz)) < d2)
+                {
+                    // set the vertex ref for this vertex position to point to
+                    // the last vertex in the result vertex array
+                    vertex_refs[lln.Value] = index;
+                    // contribute to the position sum
+                    sum_position += lln.Value;
+                    // increment the number of vertices clustered
+                    total++;
+                    // remove this node from the linked list
+                    LinkedListNode<Vector3> old = lln;
+                    lln = lln.Next;
+                    unmarked_verts.Remove(old);
+                }
+                else
+                    lln = lln.Next;
+            }
+
+            // create the resulting vertex
+            result_vertices.Add(((sum_position / total) + start_vert) * 0.5f);
+        }
+
+        // build the index array
+        int r = 0;
+        int i = 0;
+        foreach (Vector3 vertex in input_vertices)
+        {
+            int index = vertex_refs[vertex];
+            result_indices.Add(index);
+            i++;
+
+            if (index < 0 || index >= result_vertices.Count)
+                GD.Print("oops");
+
+            if (i == 3)
+            {
+                i = 0;
+                int i0 = result_indices[result_indices.Count - 3];
+                int i1 = result_indices[result_indices.Count - 2];
+                int i2 = result_indices[result_indices.Count - 1];
+
+                if (i0 == i1 || i0 == i2 || i1 == i2)
+                {
+                    result_indices.RemoveRange(result_indices.Count - 3, 3);
+                    r++;
+                }
+            }
+        }
+        GD.Print("removed " + r + " degenerate faces aka " + (r * 3) + " indices");
+    }
+
+    static void GenerateSmoothNormals(in List<Vector3> vertices, in List<int> indices, out List<Vector3> normals)
+    {
+        normals = new List<Vector3>();
+        Vector3[] normals_sum = new Vector3[vertices.Count];
+        int[] normals_num = new int[vertices.Count];
+
+        // calculate normals for each face
+        Vector3[] face_norms = new Vector3[indices.Count / 3];
+        int j = 0;
+        for (int i = 0; i < face_norms.Length; i++)
+        {
+            int i0 = indices[j];
+            int i1 = indices[j + 1];
+            int i2 = indices[j + 2];
+            Vector3 v0 = vertices[i0];
+            Vector3 v1 = vertices[i1];
+            Vector3 v2 = vertices[i2];
+            Vector3 norm = (v2 - v0).Cross(v1 - v0).Normalized();
+            face_norms[i] = norm;
+
+            // add normal to vertices which use it
+            normals_sum[i0] += norm; normals_num[i0]++;
+            normals_sum[i1] += norm; normals_num[i1]++;
+            normals_sum[i2] += norm; normals_num[i2]++;
+
+            j += 3;
+        }
+
+        // divide normals to average out
+        normals.EnsureCapacity(vertices.Count);
+        for (int i = 0; i < normals_num.Length; i++)
+            normals.Add(normals_sum[i] / normals_num[i]);
     }
 }
