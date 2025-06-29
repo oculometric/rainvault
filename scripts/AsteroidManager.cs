@@ -46,6 +46,7 @@ public partial class AsteroidManager : MeshInstance3D
 
     public void ScanRay(Vector3 origin, Vector3 direction, float radius)
     {
+        GD.Print("scanning...");
         PhysicsRayQueryParameters3D param = new PhysicsRayQueryParameters3D();
         param.From = origin;
         param.To = param.From + (direction * 300.0f);
@@ -55,7 +56,7 @@ public partial class AsteroidManager : MeshInstance3D
             return;
 
         Vector3 local_pos = GlobalBasis.Inverse() * res["position"].AsVector3();
-
+        GD.Print("searching...");
         Vector3 closest = Vector3.Inf;
         Vector3 closest_normal = Vector3.Zero;
         LinkedListNode<Vector3> normal_node = unscanned_normals.First;
@@ -84,10 +85,5 @@ public partial class AsteroidManager : MeshInstance3D
             particles.EmissionPoints = unscanned_points.ToArray();
             particles.EmissionNormals = unscanned_normals.ToArray();
         }
-    }
-
-    public override void _Process(double delta)
-    {
-        ScanRay(GetViewport().GetCamera3D().GlobalPosition, GetViewport().GetCamera3D().ProjectRayNormal(GetViewport().GetMousePosition()), 2.0f);
     }
 }
