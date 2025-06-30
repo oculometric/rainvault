@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=4 uid="uid://dwbmmw8u65snw"]
+[gd_scene load_steps=22 format=4 uid="uid://dwbmmw8u65snw"]
 
 [ext_resource type="Shader" uid="uid://btg3qptthjgj0" path="res://shaders/sh_Background.gdshader" id="1_14tpj"]
 [ext_resource type="Shader" uid="uid://c5dxs83cr31cq" path="res://shaders/sh_BasicLit.gdshader" id="2_onh0e"]
@@ -44,15 +44,15 @@ material = SubResource("ShaderMaterial_p80au")
 flip_faces = true
 size = Vector2(2, 2)
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_a6fjw"]
-render_priority = 0
-shader = ExtResource("2_onh0e")
-shader_parameter/albedo_tex = ExtResource("3_i8f5n")
-shader_parameter/use_triplanar = true
-shader_parameter/triplanar_scale = 5.0
-shader_parameter/randomise_uv_offset = true
-shader_parameter/randomise_resolution = 640.0
-shader_parameter/randomise_lock_y = false
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_w7g02"]
+shading_mode = 2
+diffuse_mode = 3
+specular_mode = 1
+albedo_texture = ExtResource("3_i8f5n")
+uv1_scale = Vector3(0.2, 0.2, 0.2)
+uv1_triplanar = true
+uv1_triplanar_sharpness = 4.75683
+texture_filter = 0
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_q1jmw"]
 resource_name = "asteroid_Cube_001"
@@ -113,6 +113,23 @@ shader_parameter/randomise_lock_y = false
 [sub_resource type="BoxMesh" id="BoxMesh_t3hqp"]
 material = SubResource("ShaderMaterial_15vnw")
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_onh0e"]
+transparency = 1
+blend_mode = 1
+shading_mode = 0
+disable_fog = true
+albedo_color = Color(0.2205, 0.3276, 0.45, 1)
+disable_receive_shadows = true
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_onh0e"]
+material = SubResource("StandardMaterial3D_onh0e")
+top_radius = 0.0
+bottom_radius = 5.0
+radial_segments = 12
+rings = 0
+cap_top = false
+cap_bottom = false
+
 [node name="ScScanningTest" type="Node3D"]
 
 [node name="SubViewportContainer" type="SubViewportContainer" parent="."]
@@ -147,34 +164,17 @@ gi_mode = 0
 mesh = SubResource("QuadMesh_jothn")
 skeleton = NodePath("../../..")
 
-[node name="Asteroid" type="MeshInstance3D" parent="SubViewportContainer/SubViewport" node_paths=PackedStringArray("particles", "collider")]
-material_override = SubResource("ShaderMaterial_a6fjw")
+[node name="Asteroid" type="MeshInstance3D" parent="SubViewportContainer/SubViewport" node_paths=PackedStringArray("collider")]
+material_override = SubResource("StandardMaterial3D_w7g02")
 mesh = SubResource("ArrayMesh_q1jmw")
 skeleton = NodePath("")
 script = ExtResource("5_6mekv")
-particles = NodePath("CPUParticles3D")
 collider = NodePath("StaticBody3D/CollisionShape3D")
+error_chunk_mesh = SubResource("QuadMesh_6mekv")
 metadata/extras = {
 "ant_landscape": {},
 "selection_order": 0.0
 }
-
-[node name="CPUParticles3D" type="CPUParticles3D" parent="SubViewportContainer/SubViewport/Asteroid"]
-cast_shadow = 0
-amount = 2000
-lifetime = 0.25
-fract_delta = false
-local_coords = true
-mesh = SubResource("QuadMesh_6mekv")
-emission_shape = 5
-emission_points = PackedVector3Array()
-emission_normals = PackedVector3Array()
-particle_flag_align_y = true
-direction = Vector3(0, 0, 0)
-spread = 0.0
-gravity = Vector3(0, 0, 0)
-initial_velocity_min = 0.2
-initial_velocity_max = 0.2
 
 [node name="StaticBody3D" type="StaticBody3D" parent="SubViewportContainer/SubViewport/Asteroid"]
 
@@ -201,3 +201,7 @@ skeleton = NodePath("MeshInstance3D")
 [node name="MeshInstance3D" type="MeshInstance3D" parent="SubViewportContainer/SubViewport/Orbiter/OrbitalDisk/MeshInstance3D"]
 mesh = SubResource("BoxMesh_t3hqp")
 skeleton = NodePath("")
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="SubViewportContainer/SubViewport/Orbiter/OrbitalDisk"]
+transform = Transform3D(1, 0, 0, 0, -4.71559e-07, 1, 0, -10.788, -4.37114e-08, 0, 0, -11.2)
+mesh = SubResource("CylinderMesh_onh0e")

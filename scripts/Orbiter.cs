@@ -22,9 +22,9 @@ public partial class Orbiter : Node3D
         if (Input.IsKeyPressed(Key.S))
             orbit_speed -= 0.1f * (float)delta;
 
-        orbit_speed = Mathf.Clamp(orbit_speed, 0.1f, 2.0f);
+        orbit_speed = Mathf.Clamp(orbit_speed, 0.1f, 2.5f);
 
-        asteroid.ScanRay(orbiter_mesh.GlobalPosition, orbiter_mesh.GlobalBasis.Z, 5.0f);//GetViewport().GetCamera3D().GlobalPosition, GetViewport().GetCamera3D().ProjectRayNormal(GetViewport().GetMousePosition()), 2.0f);
+        asteroid.ScanRay(orbiter_mesh.GlobalPosition, orbiter_mesh.GlobalBasis.Z, 4.0f);//GetViewport().GetCamera3D().GlobalPosition, GetViewport().GetCamera3D().ProjectRayNormal(GetViewport().GetMousePosition()), 2.0f);
     }
 
     public override void _UnhandledInput(InputEvent @event)
