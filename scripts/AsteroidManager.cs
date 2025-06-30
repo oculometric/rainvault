@@ -46,7 +46,6 @@ public partial class AsteroidManager : MeshInstance3D
 
     public void ScanRay(Vector3 origin, Vector3 direction, float radius)
     {
-        GD.Print("scanning...");
         PhysicsRayQueryParameters3D param = new PhysicsRayQueryParameters3D();
         param.From = origin;
         param.To = param.From + (direction * 300.0f);
@@ -56,7 +55,6 @@ public partial class AsteroidManager : MeshInstance3D
             return;
 
         Vector3 local_pos = GlobalBasis.Inverse() * res["position"].AsVector3();
-        GD.Print("searching...");
         Vector3 closest = Vector3.Inf;
         Vector3 closest_normal = Vector3.Zero;
         LinkedListNode<Vector3> normal_node = unscanned_normals.First;
