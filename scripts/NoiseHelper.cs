@@ -89,4 +89,39 @@ public partial class NoiseHelper
 
         return v;
     }
+
+    public static float vor_hash(Vector3 _coord)
+    {
+        return Mathf.PosMod(Mathf.Sin(dot(_coord, new Vector3(201.0f, 123.0f, 304.2f))) * 190493.02095f, 1.0f) * 2.0f - 1.0f;
+    }
+
+    public static float vor(Vector3 _coord, float randomness)
+    {
+        Vector3 cell = floor(_coord);
+        float closest = 4.0f;
+        Vector3 closest_cell = Vector3.Zero;
+        float max_rand = Mathf.Ceil(randomness);
+
+        for (float z = cell.Z - max_rand; z <= cell.Z + max_rand; z += 1.0f)
+        {
+            for (float y = cell.Y - max_rand; y <= cell.Y + max_rand; y += 1.0f)
+            {
+                for (float x = cell.X - max_rand; x <= cell.X + max_rand; x += 1.0f)
+                {
+                    Vector3 test_cell = new Vector3(x, y, z);
+                    test_cell += new Vector3(vor_hash(new Vector3(x, y, z)), vor_hash(new Vector3(y, z, x)), vor_hash(new Vector3(z, x, y))) * randomness * 0.5f;
+
+                    float dist = (_coord - test_cell).Length();
+                    if (dist < closest)
+                    {
+                        closest = dist;
+                        closest_cell = new Vector3(x, y, z);
+                    }
+                }
+            }
+        }
+
+        //containing_cell = closest_cell;
+        return closest;
+    }
 }

@@ -1,8 +1,7 @@
 using Godot;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 
+[Tool]
 public partial class AsteroidManager : MeshInstance3D
 {
     [Export] private CollisionShape3D collider;
@@ -11,18 +10,26 @@ public partial class AsteroidManager : MeshInstance3D
     private Dictionary<Vector3, MeshInstance3D> all_points = new Dictionary<Vector3, MeshInstance3D>(); // TODO: convert this to a pair of arrays so we dont have to iterate a lot
 
     Vector3 seed = Vector3.Zero;
+    Vector3 shape = Vector3.Zero;
     float AsteroidNoise(Vector3 v)
     {
-        return 80.0f - (((v.X * v.X) + (v.Y * v.Y) + (v.Z * v.Z))) + (NoiseHelper.fbm((v / 10.0f) + seed, 6, 2.0f, 0.5f) * 80.0f);
+        return 80.0f 
+            - (((v.X * v.X / shape.X) + (v.Y * v.Y / shape.Y) + (v.Z * v.Z / shape.Z)))
+            + (NoiseHelper.fbm((v / 20.0f) + seed, 6, 1.5f, 0.8f) * 150.0f)
+            + ((Mathf.Pow(NoiseHelper.vor((v / 5.0f) - seed, 0.8f), 3.0f) - 0.1f) * 100.0f);
     }
 
+    [ExportToolButton("Regenerate Mesh")]
+    public Callable GenerateMeshButton => Callable.From(_Ready);
     public override void _Ready()
     {
         RandomNumberGenerator rng = new RandomNumberGenerator();
         rng.Randomize();
         seed = new Vector3(rng.Randf(), rng.Randf(), rng.Randf()) * 1000.0f;
+        shape = new Vector3(rng.RandfRange(0.35f, 1.0f), rng.RandfRange(0.35f, 1.0f), rng.RandfRange(0.35f, 1.0f));
+        shape = shape.Normalized();
         // generate mesh
-        Mesh = MeshVoxeliser.GenerateMesh(AsteroidNoise, 0.0f, 1.0f, 1.414f, Vector3.Zero, Vector3.One * 24.0f);
+        Mesh = MeshVoxeliser.GenerateMesh(AsteroidNoise, 0.0f, 1.0f, 0.814f, Vector3.Zero, Vector3.One * 24.0f);
         ArrayMesh am = Mesh as ArrayMesh;
         Vector3[] verts = am.SurfaceGetArrays(0)[(int)Mesh.ArrayType.Vertex].AsVector3Array();
         Vector3[] norms = am.SurfaceGetArrays(0)[(int)Mesh.ArrayType.Normal].AsVector3Array();
@@ -32,6 +39,9 @@ public partial class AsteroidManager : MeshInstance3D
         for (int i = 0; i < inds.Length; i++)
             collision_verts[i] = verts[inds[i]];
         (collider.Shape as ConcavePolygonShape3D).SetFaces(collision_verts);
+
+        if (Engine.IsEditorHint())
+            return;
 
         // generate coverage points
         for (int i = 0; i < verts.Length; i++)
