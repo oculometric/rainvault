@@ -1,0 +1,176 @@
+[gd_scene load_steps=18 format=3 uid="uid://ccjsv40x5cohk"]
+
+[ext_resource type="Shader" uid="uid://btg3qptthjgj0" path="res://shaders/sh_Background.gdshader" id="1_xemtq"]
+[ext_resource type="Shader" uid="uid://hgsitnkdd3ew" path="res://shaders/sh_Composite.gdshader" id="1_xtngx"]
+[ext_resource type="Script" uid="uid://v6kdxpf4xwb5" path="res://scripts/ViewportTextureGrab.cs" id="2_2kman"]
+[ext_resource type="Shader" uid="uid://btkf54oigri3y" path="res://shaders/sh_Water.gdshader" id="2_3wwwg"]
+[ext_resource type="ArrayMesh" uid="uid://dvwfn3hs07ga3" path="res://meshes/greenhouse/sm_Arch.res" id="3_rfusl"]
+[ext_resource type="ArrayMesh" uid="uid://bg8wixs40nand" path="res://meshes/greenhouse/sm_ArchCurved.res" id="4_xtngx"]
+[ext_resource type="ArrayMesh" uid="uid://dgoffw7qf7fve" path="res://meshes/greenhouse/sm_FloorCorner.res" id="5_2kman"]
+[ext_resource type="ArrayMesh" uid="uid://depuo7i2ltywb" path="res://meshes/greenhouse/sm_FloorEdge.res" id="6_8gb3r"]
+[ext_resource type="ArrayMesh" uid="uid://dpwnrnly8hivc" path="res://meshes/greenhouse/sm_Wall.res" id="7_pewvy"]
+[ext_resource type="ArrayMesh" uid="uid://bhjahqyygojn3" path="res://meshes/greenhouse/sm_WallCurved.res" id="8_a1mfk"]
+
+[sub_resource type="Environment" id="Environment_xemtq"]
+background_mode = 1
+background_color = Color(0.62656, 0.6072, 0.66, 1)
+tonemap_mode = 2
+ssao_enabled = true
+ssao_radius = 4.0
+ssao_intensity = 1.0
+ssao_power = 1.09806
+ssao_detail = 5.0
+ssao_horizon = 0.09
+ssao_light_affect = 1.0
+ssao_ao_channel_affect = 1.0
+glow_enabled = true
+glow_hdr_threshold = 0.9
+fog_mode = 1
+fog_light_color = Color(0.57, 0.54796, 0.4047, 1)
+fog_density = 1.0
+fog_depth_curve = 1.86607
+fog_depth_begin = 1.0
+fog_depth_end = 32.0
+volumetric_fog_albedo = Color(0.685591, 0.733878, 0.620301, 1)
+volumetric_fog_emission = Color(0.591944, 0.502902, 0.367152, 1)
+volumetric_fog_length = 32.0
+adjustment_enabled = true
+adjustment_contrast = 0.9
+adjustment_saturation = 1.4
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_p80au"]
+render_priority = -20
+shader = ExtResource("1_xemtq")
+
+[sub_resource type="QuadMesh" id="QuadMesh_avl8m"]
+material = SubResource("ShaderMaterial_p80au")
+flip_faces = true
+size = Vector2(2, 2)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_xtngx"]
+shader = ExtResource("1_xtngx")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_avl8m"]
+render_priority = -10
+shader = ExtResource("2_3wwwg")
+shader_parameter/light_blue = Color(0.402314, 0.671574, 0.752657, 1)
+shader_parameter/dark_blue = Color(0.0728, 0.3164, 0.56, 1)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_xemtq"]
+material = SubResource("ShaderMaterial_avl8m")
+
+[sub_resource type="BoxMesh" id="BoxMesh_xemtq"]
+
+[node name="ScTowerTest" type="Node3D"]
+
+[node name="SubViewportContainer2" type="SubViewportContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+stretch = true
+stretch_shrink = 3
+
+[node name="SubViewport" type="SubViewport" parent="SubViewportContainer2"]
+handle_input_locally = false
+size = Vector2i(426, 320)
+render_target_update_mode = 4
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="SubViewportContainer2/SubViewport"]
+transform = Transform3D(0.71013, -0.4655, 0.528228, -0.67619, -0.241879, 0.695889, -0.196169, -0.851354, -0.486532, 0.680677, 2.51488, -0.304526)
+light_color = Color(1, 0.954, 0.88, 1)
+light_bake_mode = 1
+shadow_enabled = true
+shadow_reverse_cull_face = true
+sky_mode = 1
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="SubViewportContainer2/SubViewport"]
+environment = SubResource("Environment_xemtq")
+
+[node name="Background" type="MeshInstance3D" parent="SubViewportContainer2/SubViewport"]
+cast_shadow = 0
+extra_cull_margin = 16384.0
+gi_mode = 0
+mesh = SubResource("QuadMesh_avl8m")
+skeleton = NodePath("../../../root/@EditorNode@21301/@Panel@14/@VBoxContainer@15/DockHSplitLeftL/DockHSplitLeftR/DockHSplitMain/@VBoxContainer@26/DockVSplitCenter/@VSplitContainer@54/@VBoxContainer@55/@EditorMainScreen@102/MainScreen/@CanvasItemEditor@11482/@VSplitContainer@11134/@HSplitContainer@11136/@HSplitContainer@11138/@Control@11139/@SubViewportContainer@11140/@SubViewport@11141/ScTowerTest")
+
+[node name="Camera3D" type="Camera3D" parent="SubViewportContainer2/SubViewport"]
+transform = Transform3D(-3.78552e-08, -0.5, 0.866025, -2.18557e-08, 0.866025, 0.5, -1, 1.95399e-14, -4.37114e-08, 35.2, 20.8, 0)
+fov = 49.1
+
+[node name="SubViewportContainer" type="ColorRect" parent="." node_paths=PackedStringArray("viewports")]
+material = SubResource("ShaderMaterial_xtngx")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("2_2kman")
+viewports = [NodePath("../SubViewportContainer2/SubViewport")]
+shader_parameters = Array[String](["game_texture"])
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(20, 0, 0, 0, 20, 0, 0, 0, 20, 0, -2.75334, 0)
+cast_shadow = 0
+mesh = SubResource("PlaneMesh_xemtq")
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="."]
+transform = Transform3D(3, 0, 0, 0, 16, 0, 0, 0, 3, 0, 3, 0)
+mesh = SubResource("BoxMesh_xemtq")
+
+[node name="MeshInstance3D3" type="MeshInstance3D" parent="."]
+transform = Transform3D(6, 0, 0, 0, 8, 0, 0, 0, 4, 1.5, 1, 0.5)
+mesh = SubResource("BoxMesh_xemtq")
+
+[node name="MeshInstance3D4" type="MeshInstance3D" parent="."]
+transform = Transform3D(8, 0, 0, 0, 16, 0, 0, 0, 8, 1.5, -10, 0.5)
+mesh = SubResource("BoxMesh_xemtq")
+
+[node name="SmArch" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.8, 2.4, 2.8)
+mesh = ExtResource("3_rfusl")
+
+[node name="SmArchCurved" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.6, 2.4, 2.8)
+mesh = ExtResource("4_xtngx")
+
+[node name="SmFloorCorner" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.6, -1.6, 2.8)
+mesh = ExtResource("5_2kman")
+
+[node name="SmFloorEdge" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.8, -1.6, 2.8)
+mesh = ExtResource("6_8gb3r")
+
+[node name="SmWall" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.8, -1.6, 2.8)
+mesh = ExtResource("7_pewvy")
+
+[node name="SmArch2" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2, 2.4, 2.8)
+mesh = ExtResource("3_rfusl")
+
+[node name="SmFloorEdge2" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2, -1.6, 2.8)
+mesh = ExtResource("6_8gb3r")
+
+[node name="SmWall2" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2, -1.6, 2.8)
+mesh = ExtResource("7_pewvy")
+
+[node name="SmArch3" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.4, 2.4, 2.8)
+mesh = ExtResource("3_rfusl")
+
+[node name="SmFloorEdge3" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.4, -1.6, 2.8)
+mesh = ExtResource("6_8gb3r")
+
+[node name="SmWall3" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.4, -1.6, 2.8)
+mesh = ExtResource("7_pewvy")
+
+[node name="SmWallCurved" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.6, -1.6, 2.8)
+mesh = ExtResource("8_a1mfk")
